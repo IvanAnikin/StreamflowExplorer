@@ -26,10 +26,10 @@ function App() {
   } 
 
   const getNewestProgramIds = async () => {
-    //for (let i = 0; i < 10; i++){
+    for (let i = 0; i < 100; i++){
       const block = await connection.getBlockHeight();
       console.log("Block height: " + block);
-
+      try {
       const blockInfo = await connection.getBlock(block);
       console.log(blockInfo)
 
@@ -38,17 +38,22 @@ function App() {
 
         if (transaction) for (let accountKeyIndex = 0; accountKeyIndex < transaction?.transaction.message.accountKeys.length; accountKeyIndex++){
           const accountKey = transaction.transaction.message.accountKeys.at(accountKeyIndex) 
-          if(accountKey && !foundProgramIds.includes(accountKey?.toString())) foundProgramIds.push(accountKey.toString())
+            if(accountKey && !foundProgramIds.includes(accountKey?.toString())) foundProgramIds.push(accountKey.toString())
+          }
         }
+      }
+      catch (error){
+        console.log("ERROR")
       }
       
       console.log(foundProgramIds.length);
 
+
       
 
-      await new Promise((r) => setTimeout(r, 5000)) // wait 5 seconds
+      //await new Promise((r) => setTimeout(r, 5000)) // wait 5 seconds
 
-    //}
+    }
   }
 
   const printSavedProgramIds = () => {
