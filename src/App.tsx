@@ -6,6 +6,21 @@ import { hasSelectionSupport } from '@testing-library/user-event/dist/utils';
 function App() {
 
   let foundProgramIds = [""]
+  foundProgramIds.pop();
+
+  const uniqueMessages = [
+    "Initializing SPL token stream",
+    "Stream",
+    "stream"
+  ]
+
+  const blacklistedProgramIds = [
+    "11111111111111111111111111111111",
+    "Config1111111111111111111111111111111111111",
+    "Vote111111111111111111111111111111111111111",
+    "Stake11111111111111111111111111111111111111"
+  ]
+
   const interesting_ids = {
     "BONFIDA": "EchesyfXePKdLtoiZSL8pBe8Myagyy8ZRqsACNCFGnvp",
     "BONFIDA Pool Program": "WvmTNLpGMVbwJVYztYL4Hnsy82cJhQorxjnnXcRm3b6" ,
@@ -26,7 +41,9 @@ function App() {
   } 
 
   const getNewestProgramIds = async () => {
-    for (let i = 0; i < 100; i++){
+    
+
+    for (let i = 0; i < 1000 /*100*/; i++){
       const block = await connection.getBlockHeight();
       console.log("Block height: " + block);
       try {
@@ -35,11 +52,43 @@ function App() {
 
         if (blockInfo) for (let transationIndex = 0; transationIndex < blockInfo?.transactions.length; transationIndex++){
           const transaction = blockInfo?.transactions.at(transationIndex)
-          let usedAccounts = [""]
+          let foundAccounts = [""]
+          
 
-          if (transaction) for (let accountKeyIndex = 0; accountKeyIndex < transaction?.transaction.message.accountKeys.length; accountKeyIndex++){
-            const accountKey = transaction.transaction.message.accountKeys.at(accountKeyIndex) 
-            if(accountKey && !usedAccounts.includes(accountKey?.toString())) usedAccounts.push(accountKey.toString())
+          if (transaction && transaction.meta && transaction.meta.logMessages) {
+            for (let accountKeyIndex = 0; accountKeyIndex < transaction?.transaction.message.accountKeys.length; accountKeyIndex++){
+              const accountKey = transaction.transaction.message.accountKeys.at(accountKeyIndex) 
+              //if(accountKey && !foundAccounts.includes(accountKey?.toString())) foundAccounts.push(accountKey.toString())
+
+              if (accountKey && !foundProgramIds.includes(accountKey.toString()) && transaction.meta.logMessages.at(0)?.includes(accountKey?.toString())){
+                const mainProgramId = accountKey.toString();
+
+                // Checking a log message
+                for (let logMessagesIndex = 1; logMessagesIndex < transaction.meta.logMessages?.length; logMessagesIndex++){
+                  const logMessage = transaction.meta.logMessages.at(logMessagesIndex)
+    
+                  if (!foundProgramIds.includes(mainProgramId) && !blacklistedProgramIds.includes(mainProgramId)){
+                    
+                    // Checking log messages
+                    uniqueMessages.forEach(uniqueMessage => {
+                      if (logMessage?.includes(uniqueMessage)) {
+                        foundProgramIds.push(mainProgramId)
+                        console.log(logMessage)
+                        console.log("Written!")
+                      }
+                    })
+
+                    
+    
+                    
+                  }
+    
+                  // To be completed
+                }
+              }
+            }
+
+            
           }
 
          
