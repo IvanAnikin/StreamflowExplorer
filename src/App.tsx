@@ -30,17 +30,23 @@ function App() {
       const block = await connection.getBlockHeight();
       console.log("Block height: " + block);
       try {
-      const blockInfo = await connection.getBlock(block);
-      console.log(blockInfo)
+        const blockInfo = await connection.getBlock(block);
+        console.log(blockInfo)
 
-      if (blockInfo) for (let transationIndex = 0; transationIndex < blockInfo?.transactions.length; transationIndex++){
-        const transaction = blockInfo?.transactions.at(transationIndex)
+        if (blockInfo) for (let transationIndex = 0; transationIndex < blockInfo?.transactions.length; transationIndex++){
+          const transaction = blockInfo?.transactions.at(transationIndex)
+          let usedAccounts = [""]
 
-        if (transaction) for (let accountKeyIndex = 0; accountKeyIndex < transaction?.transaction.message.accountKeys.length; accountKeyIndex++){
-          const accountKey = transaction.transaction.message.accountKeys.at(accountKeyIndex) 
-            if(accountKey && !foundProgramIds.includes(accountKey?.toString())) foundProgramIds.push(accountKey.toString())
+          if (transaction) for (let accountKeyIndex = 0; accountKeyIndex < transaction?.transaction.message.accountKeys.length; accountKeyIndex++){
+            const accountKey = transaction.transaction.message.accountKeys.at(accountKeyIndex) 
+            if(accountKey && !usedAccounts.includes(accountKey?.toString())) usedAccounts.push(accountKey.toString())
           }
+
+         
         }
+
+
+        
       }
       catch (error){
         console.log("ERROR")
