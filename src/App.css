@@ -20,6 +20,7 @@
   color: #212529;
   background-color: #f8f9fa;
   border-color: #f8f9fa;
+  margin-top: 10px;
 }
 #btn2{
   display: inline-block;
@@ -40,6 +41,7 @@
   color: #212529;
   background-color: #f8f9fa;
   border-color: #f8f9fa;
+  margin-top: 20px;
 }
 .App-logo {
   height: 40vmin;

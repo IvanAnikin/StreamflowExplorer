@@ -13,13 +13,6 @@ function App() {
     "BONFIDA Governance Token": "5vUBtmmHjSfpY1h24XhzEjRKjDyK5jNL9gT2BfM3wcnb"
   };
 
-  //const onload = async () => {
-  //  var element = document.getElementById('btn') as HTMLButtonElement;
-  //  var element2 = document.getElementById('btn2') as HTMLButtonElement;
-  //  element.classList.add('btn btn-primary');
-  //  element2.classList.add('btn btn-primary');
-  //}
-
   const get_interesting = async () => {
     for (let [key, value] of Object.entries(interesting_ids)) {
       console.log("Searching for '" + key + "' with id = '" + value + "'")
@@ -34,6 +27,11 @@ function App() {
       let programAccounts = await connection.getProgramAccounts(new web3.PublicKey(value_var));
       console.log("Program accounts:");
       console.log(programAccounts);
+      //let parsedTransactions = await connection.getParsedTransactions(new web3.PublicKey(value_var));
+      //let transactionCount = await connection.getTransactionCount(new web3.PublicKey(value_var));
+      //let confirmedTransactions = await connection.GetConfirmedTransaction(new web3.PublicKey(value_var));
+      //console.log("Confirmed transactions:");
+      //console.log(confirmedTransactions);
     }
     console.log("Finished 'get_interesting' function")
   }
@@ -75,9 +73,9 @@ function App() {
     <div className="App">
       <header className="App-header">
         <h1>Explore Solana network - F12 Console</h1>
-        <input type="text" id="search_field" name="search_field" placeholder='Account name or ID'></input>
-        <button  type="button" onClick={search} id="btn" className='btn btn-light'>Search</button>
-        <button  type="button" onClick={get_interesting} id="btn2" className='btn btn-light'>Get saved interesting accounts</button>
+        <input type="text" className="form-control" id="search_field" name="search_field" placeholder='Account name or ID'></input>
+        <button type="button" onClick={search} id="btn" className='btn btn-light'>Search</button>
+        <button type="button" onClick={get_interesting} id="btn2" className='btn btn-light'>Get saved interesting accounts</button>
       </header>
     </div>
   );
