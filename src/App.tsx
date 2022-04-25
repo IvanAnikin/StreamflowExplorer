@@ -21,7 +21,6 @@ function App() {
   //}
 
   const get_interesting = async () => {
-
     for (let [key, value] of Object.entries(interesting_ids)) {
       console.log("Searching for '" + key + "' with id = '" + value + "'")
       var connection = new web3.Connection(
@@ -37,7 +36,6 @@ function App() {
       console.log(programAccounts);
     }
     console.log("Finished 'get_interesting' function")
-
   }
 
   const search = async () => {
@@ -64,10 +62,12 @@ function App() {
     }
     const block = await connection.getBlocks(slot-10, slot);
     console.log("Block: " + block)
-    
     let account = await connection.getAccountInfo(new web3.PublicKey(search_field_val)); 
+    console.log("Account info:");
     console.log(account);
-
+    let programAccounts = await connection.getProgramAccounts(new web3.PublicKey(search_field_val));
+    console.log("Program accounts:");
+    console.log(programAccounts);
     console.log("Finished 'search' function")
   };
 
