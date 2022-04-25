@@ -1,7 +1,5 @@
-
 import './App.css';
 import * as web3 from '@solana/web3.js';
-
 
 
 function App() {
@@ -15,12 +13,12 @@ function App() {
     "BONFIDA Governance Token": "5vUBtmmHjSfpY1h24XhzEjRKjDyK5jNL9gT2BfM3wcnb"
   };
 
-  const onload = async () => {
-    var element = document.getElementById('btn') as HTMLButtonElement;
-    var element2 = document.getElementById('btn2') as HTMLButtonElement;
-    element.classList.add('btn btn-primary');
-    element2.classList.add('btn btn-primary');
-  }
+  //const onload = async () => {
+  //  var element = document.getElementById('btn') as HTMLButtonElement;
+  //  var element2 = document.getElementById('btn2') as HTMLButtonElement;
+  //  element.classList.add('btn btn-primary');
+  //  element2.classList.add('btn btn-primary');
+  //}
 
   const get_interesting = async () => {
 
@@ -36,8 +34,10 @@ function App() {
       );
       var value_var = value as string;
       let account = await connection.getAccountInfo(new web3.PublicKey(value_var));
+      console.log("Account info:");
       console.log(account);
       let programAccounts = await connection.getProgramAccounts(new web3.PublicKey(value_var));
+      console.log("Program accounts:");
       console.log(programAccounts);
     }
     console.log("Finished 'get_interesting' function")
@@ -48,53 +48,40 @@ function App() {
 
     var search_field = document.getElementById("search_field") as HTMLInputElement;
     var search_field_val = search_field.value as string;
-
     for (let [key, value] of Object.entries(interesting_ids)) {
       if(search_field_val == key){
         search_field_val=value;
       }
     }
-
-    console.log("Searching for: '" + search_field.value + "'");
+    console.log("Searching for: '" + search_field_val + "'");
     
-    // Connect to cluster
     var connection = new web3.Connection(
       web3.clusterApiUrl('mainnet-beta'),
       'confirmed',
     );
     const slot = await connection.getSlot();
     console.log("Actual slot: " + slot)
-    /*for (let i = 0; i < 10; i++){
+    for (let i = 0; i < 10; i++){
       const currentSlot = slot - i;
       const block = await connection.getBlock(currentSlot);
       console.log(block)
     }
-    */
     const block = await connection.getBlocks(slot-10, slot);
     console.log("Block: " + block)
-    // get account info
-    // account data is bytecode that needs to be deserialized serialization and deserialization is program specific connection.
+    
     let account = await connection.getAccountInfo(new web3.PublicKey(search_field_val)); 
     console.log(account);
-    
-    // ONLY ACCOUNT INFO
-    //var connection2 = new web3.Connection(
-    //  web3.clusterApiUrl('mainnet-beta'),
-    //  'confirmed',
-    //);
-    //let account2 = await connection2.getAccountInfo(new web3.PublicKey(search_field_val)); //"WvmTNLpGMVbwJVYztYL4Hnsy82cJhQorxjnnXcRm3b6"
-    //console.log(account2);
 
     console.log("Finished 'search' function")
   };
 
   return (
-    <div className="App" onLoad={onload}>
+    <div className="App">
       <header className="App-header">
         <h1>Explore Solana network - F12 Console</h1>
         <input type="text" id="search_field" name="search_field" placeholder='Account name or ID'></input>
-        <button  type="button" onClick={search} id="btn" >Search</button>
-        <button  type="button" onClick={get_interesting} id="btn2" >Get saved interesting accounts</button>
+        <button  type="button" onClick={search} id="btn" className='btn btn-light'>Search</button>
+        <button  type="button" onClick={get_interesting} id="btn2" className='btn btn-light'>Get saved interesting accounts</button>
       </header>
     </div>
   );
