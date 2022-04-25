@@ -41,7 +41,7 @@ function App() {
     var search_field = document.getElementById("search_field") as HTMLInputElement;
     var search_field_val = search_field.value as string;
     for (let [key, value] of Object.entries(interesting_ids)) {
-      if(search_field_val == key){
+      if(search_field_val === key){
         search_field_val=value;
       }
     }
@@ -73,9 +73,11 @@ function App() {
     <div className="App">
       <header className="App-header">
         <h1>Explore Solana network - F12 Console</h1>
-        <input type="text" className="form-control" id="search_field" name="search_field" placeholder='Account name or ID'></input>
-        <button type="button" onClick={search} id="btn" className='btn btn-light'>Search</button>
-        <button type="button" onClick={get_interesting} id="btn2" className='btn btn-light'>Get saved interesting accounts</button>
+        <div className='form-group' id="input_form">
+          <input type="text" className="form-control" id="search_field" name="search_field" placeholder='Account name or ID'></input>
+          <button type="button" onClick={search} id="btn" className='btn btn-light'>Search</button>
+          <button type="button" onClick={get_interesting} id="btn2" className='btn btn-light'>Get saved interesting accounts</button>
+        </div>
       </header>
     </div>
   );
