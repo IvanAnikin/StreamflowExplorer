@@ -23,12 +23,8 @@ function App() {
   const get_interesting = async () => {
 
     for (let [key, value] of Object.entries(interesting_ids)) {
-      var connection = new web3.Connection(
-        web3.clusterApiUrl('mainnet-beta'),
-        'confirmed',
-      );
       console.log("Searching for '" + key + "' with id = '" + value + "'")
-      connection = new web3.Connection(
+      var connection = new web3.Connection(
         web3.clusterApiUrl('mainnet-beta'),
         'confirmed',
       );
