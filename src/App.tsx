@@ -30,6 +30,7 @@ function App() {
     "BONFIDA Governance Token": "5vUBtmmHjSfpY1h24XhzEjRKjDyK5jNL9gT2BfM3wcnb"
   };
 
+  let counter = 0;
   const connection = new web3.Connection(
     web3.clusterApiUrl('mainnet-beta'),
     'confirmed',
@@ -39,6 +40,35 @@ function App() {
     const blockHeight = await connection.getBlockHeight();
     return blockHeight;
   } 
+
+  const analyzeStreamflow = async() => {
+    const programId = "8e72pYCDaxu3GqMfeQ5r8wFgoZSYk6oua1Qo9XpsZjX"
+    await analyzeProgramId(programId)
+  }
+
+
+  const analyzeProgramId = async(programId: string, previousId?: string) => {
+    //const programInfo = await connection.getAccountInfo(new web3.PublicKey(programId))
+    const transactions = await connection.getConfirmedSignaturesForAddress2(new web3.PublicKey(programId), { before: previousId })
+
+
+
+    transactions.forEach(transaction => {
+      const transactionId = transaction.signature;
+      console.log(transactionId)
+
+      // Here we need to analyze the individual transaction
+
+    })
+    counter++
+
+    console.log(counter)
+    if (transactions.length === 1000) await analyzeProgramId(programId, transactions.at(999)?.signature)
+  }
+  
+  const analyzeTransaction = ( /* Add parameters later */ ) => {
+    // To be completed
+  }
 
   const getNewestProgramIds = async () => {
     
@@ -110,6 +140,7 @@ function App() {
 
     }
   }
+
 
   const printSavedProgramIds = () => {
     for (let i = 0; i < foundProgramIds.length; i++){
@@ -187,6 +218,7 @@ function App() {
           <h1>Other usefull methods:</h1>
           <button type='button' onClick={getNewestProgramIds}>Get newest program ids</button>
           <button type='button' onClick={printSavedProgramIds}>Print saved program ids</button>
+          <button type='button' onClick={analyzeStreamflow}>Analyze Streamflow program</button>
 
         </div>
       </header>
