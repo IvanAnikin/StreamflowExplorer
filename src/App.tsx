@@ -56,6 +56,8 @@ function App() {
 
       // Here we need to analyze every individual transaction
       await analyzeTransaction(transactionId)
+      await new Promise((r) => setTimeout(r, 5000)) // wait 5 seconds
+
       console.log(counter)
       console.log()
       
@@ -74,24 +76,28 @@ function App() {
     if (transactionInfo && transactionInfo.meta && transactionInfo.meta.logMessages) {
 
       const logMessages: string[] = transactionInfo.meta.logMessages
-
       
-      logMessages.forEach((logMessage) => {
-        uniqueMessages.forEach(uniqueMessage => {
-        if (logMessage?.includes(uniqueMessage)) {
-            //foundProgramIds.push(mainProgramId)
-            console.log(logMessage + "     + " + transaction)
-            console.log()
-            
-        }
-      })
-      console.log(counter)
-      })
+      analyzeLogMessages(logMessages, transaction)
+      
+      
       
     }
   }
 
 
+  const analyzeLogMessages = (logMessages: string[], transactionId?: string) => {
+    logMessages.forEach((logMessage) => {
+      uniqueMessages.forEach(uniqueMessage => {
+        if (logMessage?.includes(uniqueMessage)) {
+          //foundProgramIds.push(mainProgramId)
+          if (transactionId)console.log(logMessage + "     + " + transactionId)
+          console.log()
+          
+        }
+      })
+      console.log(counter)
+    })
+  }
 
   const analyzeSignature = () => {
 
