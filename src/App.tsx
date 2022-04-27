@@ -52,25 +52,30 @@ function App() {
 
 
     transactions.forEach( async(transaction) => {
-      const transactionId = transaction.signature;
+      /*const transactionId = transaction.signature;
 
       // Here we need to analyze every individual transaction
       await analyzeTransaction(transactionId)
       console.log(counter)
-      console.log()
+      console.log()*/
       
 
     })
-    
 
+    const transactionId = "3QuLmNK9VLqufnTuwVcAQ3BhYiakT7d1kNEJepz8mR57v6xfsrRvbhu158YRB1EstzhuWbhvQBcFhD8m9ny6bhVu";
+	await analyzeTransaction(transactionId)
     
     if (transactions.length === 1000) await analyzeProgramId(programId, transactions.at(999)?.signature)
   }
   
   const analyzeTransaction = async( transaction: any ) => {
 
-    const transactionInfo = typeof transaction === "string" ? await connection.getTransaction(transaction) : transaction
-
+    const transactionInfo = typeof transaction === "string" ? await connection.getParsedTransaction(transaction) : transaction
+	console.log(transactionInfo)
+	//checking acc count
+	const pubkey = new web3.PublicKey(transactionInfo.transaction.message.accountKeys[0].pubkey._bn)
+	console.log(pubkey.toString())
+	//checking log message
     if (transactionInfo && transactionInfo.meta && transactionInfo.meta.logMessages) {
 
       const logMessages: string[] = transactionInfo.meta.logMessages
@@ -90,8 +95,6 @@ function App() {
       
     }
   }
-
-
 
   const analyzeSignature = () => {
 
