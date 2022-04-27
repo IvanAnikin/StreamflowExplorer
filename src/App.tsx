@@ -9,9 +9,7 @@ function App() {
   foundProgramIds.pop();
 
   const uniqueMessages = [
-    "Initializing SPL token stream",
-    "Stream",
-    "stream"
+    "Instruction: Create"
   ]
 
   const blacklistedProgramIds = [
@@ -43,7 +41,7 @@ function App() {
 
   const analyzeStreamflow = async() => {
     const programId = "8e72pYCDaxu3GqMfeQ5r8wFgoZSYk6oua1Qo9XpsZjX"
-    await analyzeProgramId(programId)
+    await analyzeProgramId(programId, "2ufBALxQgVE3zjQDQZVnfYmjRgZ2jC4deNm36kUCx5jU5df4SKFcm5pD2eAVFfL3kxUTuXQcWixX7XDE64Ak38cw")
   }
 
 
@@ -58,13 +56,14 @@ function App() {
 
       // Here we need to analyze every individual transaction
       await analyzeTransaction(transactionId)
-
+      console.log(counter)
+      console.log()
       
 
     })
-    counter++
+    
 
-    console.log(counter)
+    
     if (transactions.length === 1000) await analyzeProgramId(programId, transactions.at(999)?.signature)
   }
   
@@ -72,42 +71,30 @@ function App() {
 
     const transactionInfo = typeof transaction === "string" ? await connection.getTransaction(transaction) : transaction
 
-    if (transactionInfo && transaction.meta && transaction.meta.logMessages) {
+    if (transactionInfo && transactionInfo.meta && transactionInfo.meta.logMessages) {
 
-      for (let accountKeyIndex = 0; accountKeyIndex < transactionInfo?.transaction.message.accountKeys.length; accountKeyIndex++){
-        const accountKey = transactionInfo.transaction.message.accountKeys.at(accountKeyIndex) 
-
-        if (accountKey && !foundProgramIds.includes(accountKey.toString()) && transactionInfo.meta.logMessages.at(0)?.includes(accountKey?.toString())){
-          const mainProgramId = accountKey.toString();
-
-          // Checking a log message
-          for (let logMessagesIndex = 1; logMessagesIndex < transactionInfo.meta.logMessages?.length; logMessagesIndex++){
-            const logMessage = transactionInfo.meta.logMessages.at(logMessagesIndex)
-
-            if (!foundProgramIds.includes(mainProgramId) && !blacklistedProgramIds.includes(mainProgramId)){
-              
-              // Checking log messages
-              /*
-              uniqueMessages.forEach(uniqueMessage => {
-                if (logMessage?.includes(uniqueMessage)) {
-                  foundProgramIds.push(mainProgramId)
-                  console.log(logMessage)
-                  console.log("Written!")
-                }
-              })
-              */
-              
-
-              
-            }
-
-            // To be completed
-          }
-        }
-      }
+      const logMessages: string[] = transactionInfo.meta.logMessages
 
       
+      logMessages.forEach((logMessage) => {
+        uniqueMessages.forEach(uniqueMessage => {
+        if (logMessage?.includes(uniqueMessage)) {
+            //foundProgramIds.push(mainProgramId)
+            console.log(logMessage + "     + " + transaction)
+            console.log()
+            
+        }
+      })
+      console.log(counter)
+      })
+      
     }
+  }
+
+
+
+  const analyzeSignature = () => {
+
   }
 
   const getNewestProgramIds = async () => {
