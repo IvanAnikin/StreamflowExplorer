@@ -53,11 +53,13 @@ function App() {
 
 
 
-    transactions.forEach(transaction => {
+    transactions.forEach( async(transaction) => {
       const transactionId = transaction.signature;
-      console.log(transactionId)
 
-      // Here we need to analyze the individual transaction
+      // Here we need to analyze every individual transaction
+      await analyzeTransaction(transactionId)
+
+      
 
     })
     counter++
@@ -66,8 +68,46 @@ function App() {
     if (transactions.length === 1000) await analyzeProgramId(programId, transactions.at(999)?.signature)
   }
   
-  const analyzeTransaction = ( /* Add parameters later */ ) => {
-    // To be completed
+  const analyzeTransaction = async( transaction: any ) => {
+
+    const transactionInfo = typeof transaction === "string" ? await connection.getTransaction(transaction) : transaction
+
+    if (transactionInfo && transaction.meta && transaction.meta.logMessages) {
+
+      for (let accountKeyIndex = 0; accountKeyIndex < transactionInfo?.transaction.message.accountKeys.length; accountKeyIndex++){
+        const accountKey = transactionInfo.transaction.message.accountKeys.at(accountKeyIndex) 
+
+        if (accountKey && !foundProgramIds.includes(accountKey.toString()) && transactionInfo.meta.logMessages.at(0)?.includes(accountKey?.toString())){
+          const mainProgramId = accountKey.toString();
+
+          // Checking a log message
+          for (let logMessagesIndex = 1; logMessagesIndex < transactionInfo.meta.logMessages?.length; logMessagesIndex++){
+            const logMessage = transactionInfo.meta.logMessages.at(logMessagesIndex)
+
+            if (!foundProgramIds.includes(mainProgramId) && !blacklistedProgramIds.includes(mainProgramId)){
+              
+              // Checking log messages
+              /*
+              uniqueMessages.forEach(uniqueMessage => {
+                if (logMessage?.includes(uniqueMessage)) {
+                  foundProgramIds.push(mainProgramId)
+                  console.log(logMessage)
+                  console.log("Written!")
+                }
+              })
+              */
+              
+
+              
+            }
+
+            // To be completed
+          }
+        }
+      }
+
+      
+    }
   }
 
   const getNewestProgramIds = async () => {
@@ -84,42 +124,7 @@ function App() {
           const transaction = blockInfo?.transactions.at(transationIndex)
           let foundAccounts = [""]
           
-
-          if (transaction && transaction.meta && transaction.meta.logMessages) {
-            for (let accountKeyIndex = 0; accountKeyIndex < transaction?.transaction.message.accountKeys.length; accountKeyIndex++){
-              const accountKey = transaction.transaction.message.accountKeys.at(accountKeyIndex) 
-              //if(accountKey && !foundAccounts.includes(accountKey?.toString())) foundAccounts.push(accountKey.toString())
-
-              if (accountKey && !foundProgramIds.includes(accountKey.toString()) && transaction.meta.logMessages.at(0)?.includes(accountKey?.toString())){
-                const mainProgramId = accountKey.toString();
-
-                // Checking a log message
-                for (let logMessagesIndex = 1; logMessagesIndex < transaction.meta.logMessages?.length; logMessagesIndex++){
-                  const logMessage = transaction.meta.logMessages.at(logMessagesIndex)
-    
-                  if (!foundProgramIds.includes(mainProgramId) && !blacklistedProgramIds.includes(mainProgramId)){
-                    
-                    // Checking log messages
-                    uniqueMessages.forEach(uniqueMessage => {
-                      if (logMessage?.includes(uniqueMessage)) {
-                        foundProgramIds.push(mainProgramId)
-                        console.log(logMessage)
-                        console.log("Written!")
-                      }
-                    })
-
-                    
-    
-                    
-                  }
-    
-                  // To be completed
-                }
-              }
-            }
-
-            
-          }
+          analyzeTransaction(transaction)
 
          
         }
