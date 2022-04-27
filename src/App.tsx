@@ -54,7 +54,7 @@ function App() {
 
     for (let i = 0; i < transactions.length; i++){
       await analyzeTransaction(transactions.at(i)?.signature)
-      await new Promise((r) => setTimeout(r, 5000)) // wait 5 seconds
+      await new Promise((r) => setTimeout(r, 200)) // wait 5 seconds
     }
 
     //const transactionId = "3QuLmNK9VLqufnTuwVcAQ3BhYiakT7d1kNEJepz8mR57v6xfsrRvbhu158YRB1EstzhuWbhvQBcFhD8m9ny6bhVu";
@@ -64,6 +64,14 @@ function App() {
     if (transactions.length === 1000) await analyzeProgramId(programId, transactions.at(999)?.signature)
   }
   
+
+  ///////////////////////////////////////
+  //Streamflow original transactions examples
+  //Cancel: 4cLjhm9wkzRm6A6Cp4sX8Gd6dYBpALtQ5vayZDNyQpKwkarJnajDKo7eFto3rcrzfJJameWsZVZMPbeeBr9pbWLh
+  //Create: 5qcpvrv1HdqUg6ZULScgwN2CkeGN9fywgQmgAqkqqcUCgqg2RRa6nQcrtm43rScQUAHgytbzs6QWhdaEeGms2d56
+  //Transfer: 3G6YW6hrHakHEdbEBb2pBoCWo56WoZKmeyZPnnwCfEdQaDovy27B63KRTWT99nWQURHPdWykomKDe86AFHmAZYaU
+  //Withdraw: 3qm3dUx4puGDC4YnLPKdxqvZa5U2RmbbGBbWCGConRBCgCRUcCWW4ATtejf9ksp9guk87uPQ3ncdZNVJqqCGUnHK
+
   const analyzeTransaction = async( transaction: any ) => {
 
     const transactionInfo = typeof transaction === "string" ? await connection.getParsedTransaction(transaction) : transaction
@@ -75,18 +83,23 @@ function App() {
     if (transactionInfo && transactionInfo.meta && transactionInfo.meta.logMessages) {
 
       const logMessages: string[] = transactionInfo.meta.logMessages
+      
       analyzeLogMessages(logMessages, transaction)
 
-	  const accounts: string[] = transactionInfo.transaction.message.accountKeys
-	  if(analyzeAccounts(accounts)){
-		  console.log(transactionInfo)
-	  }
-      
+	    const accounts: string[] = transactionInfo.transaction.message.instructions[0].accounts
+      if(accounts.length === 8 || accounts.length === 9 || accounts.length === 10 || accounts.length === 12){
+          
+      }
+      else{
+        console.log("////////////////////////////")
+      }
+        console.log(accounts.length)
+        console.log(transactionInfo)
     }
   }
 
-  const analyzeAccounts = (accounts: string[]) => {
-	if(accounts.length == 12) {
+  const analyzeSignature = (accounts: string[]) => {
+	if(accounts.length === 8) {
 		return true
 	}
 	else{
@@ -108,16 +121,12 @@ function App() {
         if (logMessage?.includes(uniqueMessage)) {
           //foundProgramIds.push(mainProgramId)
           if (transactionId)console.log(logMessage + "     + " + transactionId)
-          console.log()
+          //console.log()
           
         }
       })
-      console.log(counter)
+      //console.log(counter)
     })
-  }
-
-  const analyzeSignature = () => {
-
   }
 
   const getNewestProgramIds = async () => {
