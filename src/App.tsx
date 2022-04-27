@@ -1,5 +1,7 @@
 import './App.css';
 import * as web3 from '@solana/web3.js';
+import { hasSelectionSupport } from '@testing-library/user-event/dist/utils';
+
 
 function App() {
 
@@ -7,9 +9,7 @@ function App() {
   foundProgramIds.pop();
 
   const uniqueMessages = [
-    "Initializing SPL token stream",
-    "Stream",
-    "stream"
+    "Instruction: Create"
   ]
 
   const blacklistedProgramIds = [
@@ -28,6 +28,7 @@ function App() {
     "BONFIDA Governance Token": "5vUBtmmHjSfpY1h24XhzEjRKjDyK5jNL9gT2BfM3wcnb"
   };
 
+  let counter = 0;
   const connection = new web3.Connection(
     web3.clusterApiUrl('mainnet-beta'),
     'confirmed',
@@ -37,10 +38,96 @@ function App() {
     const blockHeight = await connection.getBlockHeight();
     return blockHeight;
   } 
-  const db_test = async () => {
-    // call Prisma functions on backend side (example functions in root/script.js)
+
+  const analyzeStreamflow = async() => {
+    const programId = "8e72pYCDaxu3GqMfeQ5r8wFgoZSYk6oua1Qo9XpsZjX"
+    await analyzeProgramId(programId, "2ufBALxQgVE3zjQDQZVnfYmjRgZ2jC4deNm36kUCx5jU5df4SKFcm5pD2eAVFfL3kxUTuXQcWixX7XDE64Ak38cw")
+  }
+
+  
+
+
+
+  const analyzeProgramId = async(programId: string, previousId?: string) => {
+    //const programInfo = await connection.getAccountInfo(new web3.PublicKey(programId))
+    const transactions = await connection.getConfirmedSignaturesForAddress2(new web3.PublicKey(programId), { before: previousId })
+
+    for (let i = 0; i < transactions.length; i++){
+      await analyzeTransaction(transactions.at(i)?.signature)
+      await new Promise((r) => setTimeout(r, 200)) // wait 5 seconds
+    }
+
+    //const transactionId = "3QuLmNK9VLqufnTuwVcAQ3BhYiakT7d1kNEJepz8mR57v6xfsrRvbhu158YRB1EstzhuWbhvQBcFhD8m9ny6bhVu";
+	//await analyzeTransaction(transactionId)
+    counter++
+    console.log(counter)
+    if (transactions.length === 1000) await analyzeProgramId(programId, transactions.at(999)?.signature)
   }
   
+
+  ///////////////////////////////////////
+  //Streamflow original transactions examples
+  //Cancel: 4cLjhm9wkzRm6A6Cp4sX8Gd6dYBpALtQ5vayZDNyQpKwkarJnajDKo7eFto3rcrzfJJameWsZVZMPbeeBr9pbWLh
+  //Create: 5qcpvrv1HdqUg6ZULScgwN2CkeGN9fywgQmgAqkqqcUCgqg2RRa6nQcrtm43rScQUAHgytbzs6QWhdaEeGms2d56
+  //Transfer: 3G6YW6hrHakHEdbEBb2pBoCWo56WoZKmeyZPnnwCfEdQaDovy27B63KRTWT99nWQURHPdWykomKDe86AFHmAZYaU
+  //Withdraw: 3qm3dUx4puGDC4YnLPKdxqvZa5U2RmbbGBbWCGConRBCgCRUcCWW4ATtejf9ksp9guk87uPQ3ncdZNVJqqCGUnHK
+
+  const analyzeTransaction = async( transaction: any ) => {
+
+    const transactionInfo = typeof transaction === "string" ? await connection.getParsedTransaction(transaction) : transaction
+	//console.log(transactionInfo)
+	//checking acc count
+	//const pubkey = new web3.PublicKey(transactionInfo.transaction.message.accountKeys[0].pubkey._bn)
+	//console.log(pubkey.toString())
+	//checking log message
+    if (transactionInfo && transactionInfo.meta && transactionInfo.meta.logMessages) {
+
+      const logMessages: string[] = transactionInfo.meta.logMessages
+      
+      analyzeLogMessages(logMessages, transaction)
+
+	    const accounts: string[] = transactionInfo.transaction.message.instructions[0].accounts
+      if(accounts.length === 8 || accounts.length === 9 || accounts.length === 10 || accounts.length === 12){
+          
+      }
+      else{
+        console.log("////////////////////////////")
+      }
+        console.log(accounts.length)
+        console.log(transactionInfo)
+    }
+  }
+
+  const analyzeSignature = (accounts: string[]) => {
+	if(accounts.length === 8) {
+		return true
+	}
+	else{
+		return false
+	}
+	/*accounts.forEach((account) => {
+	})*/
+  }
+
+  const getPubkeyFromKey = (accountKey: string) => {
+    const pubkey = new web3.PublicKey(accountKey)
+    return pubkey.toString()
+  }
+
+  const analyzeLogMessages = (logMessages: string[], transactionId?: string) => {
+    logMessages.forEach((logMessage) => {
+      uniqueMessages.forEach(uniqueMessage => {
+        if (logMessage?.includes(uniqueMessage)) {
+          //foundProgramIds.push(mainProgramId)
+          if (transactionId)console.log(logMessage + "     + " + transactionId)
+          //console.log()
+          
+        }
+      })
+      //console.log(counter)
+    })
+  }
+
   const getNewestProgramIds = async () => {
     
 
@@ -55,42 +142,7 @@ function App() {
           const transaction = blockInfo?.transactions.at(transationIndex)
           let foundAccounts = [""]
           
-
-          if (transaction && transaction.meta && transaction.meta.logMessages) {
-            for (let accountKeyIndex = 0; accountKeyIndex < transaction?.transaction.message.accountKeys.length; accountKeyIndex++){
-              const accountKey = transaction.transaction.message.accountKeys.at(accountKeyIndex) 
-              //if(accountKey && !foundAccounts.includes(accountKey?.toString())) foundAccounts.push(accountKey.toString())
-
-              if (accountKey && !foundProgramIds.includes(accountKey.toString()) && transaction.meta.logMessages.at(0)?.includes(accountKey?.toString())){
-                const mainProgramId = accountKey.toString();
-
-                // Checking a log message
-                for (let logMessagesIndex = 1; logMessagesIndex < transaction.meta.logMessages?.length; logMessagesIndex++){
-                  const logMessage = transaction.meta.logMessages.at(logMessagesIndex)
-    
-                  if (!foundProgramIds.includes(mainProgramId) && !blacklistedProgramIds.includes(mainProgramId)){
-                    
-                    // Checking log messages
-                    uniqueMessages.forEach(uniqueMessage => {
-                      if (logMessage?.includes(uniqueMessage)) {
-                        foundProgramIds.push(mainProgramId)
-                        console.log(logMessage)
-                        console.log("Written!")
-                      }
-                    })
-
-                    
-    
-                    
-                  }
-    
-                  // To be completed
-                }
-              }
-            }
-
-            
-          }
+          analyzeTransaction(transaction)
 
          
         }
@@ -111,6 +163,7 @@ function App() {
 
     }
   }
+
 
   const printSavedProgramIds = () => {
     for (let i = 0; i < foundProgramIds.length; i++){
@@ -186,10 +239,10 @@ function App() {
           <button type="button" onClick={get_interesting} id="btn2" className='btn btn-light'>Get saved interesting accounts</button>¨
           <br></br>
           <h1>Other usefull methods:</h1>
-          <button type='button' onClick={getNewestProgramIds} className='btn btn-light'>Get newest program ids</button>
-          <button type='button' onClick={printSavedProgramIds} className='btn btn-light'>Print saved program ids</button>
-          <h2>DB:</h2>
-          <button type='button' onClick={db_test} id="db_test" className='btn btn-light'>DB test</button>
+          <button type='button' onClick={getNewestProgramIds}>Get newest program ids</button>
+          <button type='button' onClick={printSavedProgramIds}>Print saved program ids</button>
+          <button type='button' onClick={analyzeStreamflow}>Analyze Streamflow program</button>
+
         </div>
       </header>
     </div>
