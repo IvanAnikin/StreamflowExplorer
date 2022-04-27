@@ -9,9 +9,7 @@ function App() {
   foundProgramIds.pop();
 
   const uniqueMessages = [
-    "Initializing SPL token stream",
-    "Stream",
-    "stream"
+    "Instruction: Create"
   ]
 
   const blacklistedProgramIds = [
@@ -30,6 +28,7 @@ function App() {
     "BONFIDA Governance Token": "5vUBtmmHjSfpY1h24XhzEjRKjDyK5jNL9gT2BfM3wcnb"
   };
 
+  let counter = 0;
   const connection = new web3.Connection(
     web3.clusterApiUrl('mainnet-beta'),
     'confirmed',
@@ -39,6 +38,75 @@ function App() {
     const blockHeight = await connection.getBlockHeight();
     return blockHeight;
   } 
+
+  const analyzeStreamflow = async() => {
+    const programId = "8e72pYCDaxu3GqMfeQ5r8wFgoZSYk6oua1Qo9XpsZjX"
+    await analyzeProgramId(programId, "2ufBALxQgVE3zjQDQZVnfYmjRgZ2jC4deNm36kUCx5jU5df4SKFcm5pD2eAVFfL3kxUTuXQcWixX7XDE64Ak38cw")
+  }
+
+
+  const analyzeProgramId = async(programId: string, previousId?: string) => {
+    //const programInfo = await connection.getAccountInfo(new web3.PublicKey(programId))
+    const transactions = await connection.getConfirmedSignaturesForAddress2(new web3.PublicKey(programId), { before: previousId })
+
+
+
+    transactions.forEach( async(transaction) => {
+      /*const transactionId = transaction.signature;
+
+      // Here we need to analyze every individual transaction
+      await analyzeTransaction(transactionId)
+      await new Promise((r) => setTimeout(r, 5000)) // wait 5 seconds
+
+      console.log(counter)
+      console.log()*/
+      
+
+    })
+
+    const transactionId = "3QuLmNK9VLqufnTuwVcAQ3BhYiakT7d1kNEJepz8mR57v6xfsrRvbhu158YRB1EstzhuWbhvQBcFhD8m9ny6bhVu";
+	await analyzeTransaction(transactionId)
+    
+    if (transactions.length === 1000) await analyzeProgramId(programId, transactions.at(999)?.signature)
+  }
+  
+  const analyzeTransaction = async( transaction: any ) => {
+
+    const transactionInfo = typeof transaction === "string" ? await connection.getParsedTransaction(transaction) : transaction
+	console.log(transactionInfo)
+	//checking acc count
+	const pubkey = new web3.PublicKey(transactionInfo.transaction.message.accountKeys[0].pubkey._bn)
+	console.log(pubkey.toString())
+	//checking log message
+    if (transactionInfo && transactionInfo.meta && transactionInfo.meta.logMessages) {
+
+      const logMessages: string[] = transactionInfo.meta.logMessages
+      
+      analyzeLogMessages(logMessages, transaction)
+      
+      
+      
+    }
+  }
+
+
+  const analyzeLogMessages = (logMessages: string[], transactionId?: string) => {
+    logMessages.forEach((logMessage) => {
+      uniqueMessages.forEach(uniqueMessage => {
+        if (logMessage?.includes(uniqueMessage)) {
+          //foundProgramIds.push(mainProgramId)
+          if (transactionId)console.log(logMessage + "     + " + transactionId)
+          console.log()
+          
+        }
+      })
+      console.log(counter)
+    })
+  }
+
+  const analyzeSignature = () => {
+
+  }
 
   const getNewestProgramIds = async () => {
     
@@ -54,42 +122,7 @@ function App() {
           const transaction = blockInfo?.transactions.at(transationIndex)
           let foundAccounts = [""]
           
-
-          if (transaction && transaction.meta && transaction.meta.logMessages) {
-            for (let accountKeyIndex = 0; accountKeyIndex < transaction?.transaction.message.accountKeys.length; accountKeyIndex++){
-              const accountKey = transaction.transaction.message.accountKeys.at(accountKeyIndex) 
-              //if(accountKey && !foundAccounts.includes(accountKey?.toString())) foundAccounts.push(accountKey.toString())
-
-              if (accountKey && !foundProgramIds.includes(accountKey.toString()) && transaction.meta.logMessages.at(0)?.includes(accountKey?.toString())){
-                const mainProgramId = accountKey.toString();
-
-                // Checking a log message
-                for (let logMessagesIndex = 1; logMessagesIndex < transaction.meta.logMessages?.length; logMessagesIndex++){
-                  const logMessage = transaction.meta.logMessages.at(logMessagesIndex)
-    
-                  if (!foundProgramIds.includes(mainProgramId) && !blacklistedProgramIds.includes(mainProgramId)){
-                    
-                    // Checking log messages
-                    uniqueMessages.forEach(uniqueMessage => {
-                      if (logMessage?.includes(uniqueMessage)) {
-                        foundProgramIds.push(mainProgramId)
-                        console.log(logMessage)
-                        console.log("Written!")
-                      }
-                    })
-
-                    
-    
-                    
-                  }
-    
-                  // To be completed
-                }
-              }
-            }
-
-            
-          }
+          analyzeTransaction(transaction)
 
          
         }
@@ -110,6 +143,7 @@ function App() {
 
     }
   }
+
 
   const printSavedProgramIds = () => {
     for (let i = 0; i < foundProgramIds.length; i++){
@@ -187,6 +221,7 @@ function App() {
           <h1>Other usefull methods:</h1>
           <button type='button' onClick={getNewestProgramIds}>Get newest program ids</button>
           <button type='button' onClick={printSavedProgramIds}>Print saved program ids</button>
+          <button type='button' onClick={analyzeStreamflow}>Analyze Streamflow program</button>
 
         </div>
       </header>
