@@ -49,46 +49,60 @@ function App() {
     //const programInfo = await connection.getAccountInfo(new web3.PublicKey(programId))
     const transactions = await connection.getConfirmedSignaturesForAddress2(new web3.PublicKey(programId), { before: previousId })
 
-
-
     transactions.forEach( async(transaction) => {
-      /*const transactionId = transaction.signature;
+	    // Here we need to analyze every individual transaction
+      const transactionId = transaction.signature;
 
-      // Here we need to analyze every individual transaction
+      
       await analyzeTransaction(transactionId)
       await new Promise((r) => setTimeout(r, 5000)) // wait 5 seconds
 
-      console.log(counter)
-      console.log()*/
-      
-
     })
 
-    const transactionId = "3QuLmNK9VLqufnTuwVcAQ3BhYiakT7d1kNEJepz8mR57v6xfsrRvbhu158YRB1EstzhuWbhvQBcFhD8m9ny6bhVu";
-	await analyzeTransaction(transactionId)
-    
+    //const transactionId = "3QuLmNK9VLqufnTuwVcAQ3BhYiakT7d1kNEJepz8mR57v6xfsrRvbhu158YRB1EstzhuWbhvQBcFhD8m9ny6bhVu";
+	//await analyzeTransaction(transactionId)
+    counter++
+    console.log(counter)
     if (transactions.length === 1000) await analyzeProgramId(programId, transactions.at(999)?.signature)
   }
   
   const analyzeTransaction = async( transaction: any ) => {
 
     const transactionInfo = typeof transaction === "string" ? await connection.getParsedTransaction(transaction) : transaction
-	console.log(transactionInfo)
+	//console.log(transactionInfo)
 	//checking acc count
-	const pubkey = new web3.PublicKey(transactionInfo.transaction.message.accountKeys[0].pubkey._bn)
-	console.log(pubkey.toString())
+	//const pubkey = new web3.PublicKey(transactionInfo.transaction.message.accountKeys[0].pubkey._bn)
+	//console.log(pubkey.toString())
 	//checking log message
     if (transactionInfo && transactionInfo.meta && transactionInfo.meta.logMessages) {
 
       const logMessages: string[] = transactionInfo.meta.logMessages
-      
       analyzeLogMessages(logMessages, transaction)
-      
-      
+
+	  const accounts: string[] = transactionInfo.transaction.message.accountKeys
+	  if(analyzeAccounts(accounts)){
+		  console.log(transactionInfo)
+	  }
       
     }
   }
 
+  const analyzeAccounts = (accounts: string[]) => {
+	if(accounts.length == 12) {
+		return true
+	}
+	else{
+		return false
+	}
+	/*accounts.forEach((account) => {
+
+	})*/
+  }
+
+  const getPubkeyFromKey = (accountKey: string) => {
+	const pubkey = new web3.PublicKey(accountKey)
+	return pubkey.toString()
+  }
 
   const analyzeLogMessages = (logMessages: string[], transactionId?: string) => {
     logMessages.forEach((logMessage) => {
