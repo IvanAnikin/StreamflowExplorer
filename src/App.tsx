@@ -44,20 +44,18 @@ function App() {
     await analyzeProgramId(programId, "2ufBALxQgVE3zjQDQZVnfYmjRgZ2jC4deNm36kUCx5jU5df4SKFcm5pD2eAVFfL3kxUTuXQcWixX7XDE64Ak38cw")
   }
 
+  
+
+
 
   const analyzeProgramId = async(programId: string, previousId?: string) => {
     //const programInfo = await connection.getAccountInfo(new web3.PublicKey(programId))
     const transactions = await connection.getConfirmedSignaturesForAddress2(new web3.PublicKey(programId), { before: previousId })
 
-    transactions.forEach( async(transaction) => {
-	    // Here we need to analyze every individual transaction
-      const transactionId = transaction.signature;
-
-      
-      await analyzeTransaction(transactionId)
+    for (let i = 0; i < transactions.length; i++){
+      await analyzeTransaction(transactions.at(i)?.signature)
       await new Promise((r) => setTimeout(r, 5000)) // wait 5 seconds
-
-    })
+    }
 
     //const transactionId = "3QuLmNK9VLqufnTuwVcAQ3BhYiakT7d1kNEJepz8mR57v6xfsrRvbhu158YRB1EstzhuWbhvQBcFhD8m9ny6bhVu";
 	//await analyzeTransaction(transactionId)
@@ -100,8 +98,8 @@ function App() {
   }
 
   const getPubkeyFromKey = (accountKey: string) => {
-	const pubkey = new web3.PublicKey(accountKey)
-	return pubkey.toString()
+    const pubkey = new web3.PublicKey(accountKey)
+    return pubkey.toString()
   }
 
   const analyzeLogMessages = (logMessages: string[], transactionId?: string) => {
