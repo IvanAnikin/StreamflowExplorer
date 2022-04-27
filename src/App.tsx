@@ -1,7 +1,5 @@
 import './App.css';
 import * as web3 from '@solana/web3.js';
-import { hasSelectionSupport } from '@testing-library/user-event/dist/utils';
-
 
 function App() {
 
@@ -39,7 +37,10 @@ function App() {
     const blockHeight = await connection.getBlockHeight();
     return blockHeight;
   } 
-
+  const db_test = async () => {
+    // call Prisma functions on backend side (example functions in root/script.js)
+  }
+  
   const getNewestProgramIds = async () => {
     
 
@@ -185,9 +186,10 @@ function App() {
           <button type="button" onClick={get_interesting} id="btn2" className='btn btn-light'>Get saved interesting accounts</button>¨
           <br></br>
           <h1>Other usefull methods:</h1>
-          <button type='button' onClick={getNewestProgramIds}>Get newest program ids</button>
-          <button type='button' onClick={printSavedProgramIds}>Print saved program ids</button>
-
+          <button type='button' onClick={getNewestProgramIds} className='btn btn-light'>Get newest program ids</button>
+          <button type='button' onClick={printSavedProgramIds} className='btn btn-light'>Print saved program ids</button>
+          <h2>DB:</h2>
+          <button type='button' onClick={db_test} id="db_test" className='btn btn-light'>DB test</button>
         </div>
       </header>
     </div>

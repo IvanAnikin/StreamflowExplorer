@@ -1,8 +1,13 @@
 .App {
   text-align: center;
 }
+.btn{
+  margin-top: 20px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
 #btn{
-  display: inline-block;
   font-weight: 400;
   text-align: center;
   white-space: nowrap;
@@ -26,7 +31,6 @@
   margin-right: auto;
 }
 #btn2{
-  display: inline-block;
   font-weight: 400;
   text-align: center;
   white-space: nowrap;
