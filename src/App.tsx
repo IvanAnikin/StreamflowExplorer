@@ -9,7 +9,39 @@ function App() {
   foundProgramIds.pop();
 
   const uniqueMessages = [
-    "Instruction: Create"
+    "Initializing SPL token stream",
+    "Error: Given timestamps are invalid",
+    "Error: Insufficient funds in ", // + acc.sender.key
+    "Error: Insufficient tokens in sender's wallet",
+    "Initializing recipient's associated token account",
+    "Creating account for holding metadata",
+    "Creating account for holding tokens",
+    "Initializing escrow account for ", // + acc.mint.key token
+    "Moving funds into escrow account",
+    "Called by ", // + acc.sender.key
+    "Metadata written in ", // + acc.metadata.key
+    "Funds locked in ", // + acc.escrow_tokens.key
+    "Stream duration is ", // + pretty_time(metadata.ix.end_time - metadata.ix.start_time)
+    "Cliff happens at ", // + pretty_time(metadata.ix.cliff));
+    "Withdrawing from SPL token stream",
+    "Error: Metadata does not match given accounts",
+    "Amount requested for withdraw is more than what is available",
+
+
+    "Cancelling SPL token stream",
+
+    "Transferring stream recipient",
+    "Error: Insufficient funds in ", // {}",
+    "Initializing new recipient's associated token account",
+  ]
+  const uniqueMessagesSplit = [
+    ["Successfully initialized ", " token stream for "],
+    [ "Returning ", " lamports ", " to "],
+    ["Withdrawn: ", " tokens"],
+    ["Remaining: ", " tokens"],
+    ["Transferred: ", " tokens"],
+    ["Returned: ", " tokens"],
+    ["Returned rent: ", " lamports"]
   ]
 
   const blacklistedProgramIds = [
@@ -140,7 +172,7 @@ function App() {
 
   const analyzeStreamflow = async() => {
     const programId = "8e72pYCDaxu3GqMfeQ5r8wFgoZSYk6oua1Qo9XpsZjX"
-    await analyzeProgramId(programId, "2ufBALxQgVE3zjQDQZVnfYmjRgZ2jC4deNm36kUCx5jU5df4SKFcm5pD2eAVFfL3kxUTuXQcWixX7XDE64Ak38cw")
+    await analyzeProgramId(programId)
   }
 
   
@@ -151,18 +183,18 @@ function App() {
     //const programInfo = await connection.getAccountInfo(new web3.PublicKey(programId))
     const transactions = await connection.getConfirmedSignaturesForAddress2(new web3.PublicKey(programId), { before: previousId })
 
-    const programInfo = await connection.getProgramAccounts(new web3.PublicKey(programId));
-    console.log(programInfo)
-    for (let i = 0; i < transactions.length; i++){
+    const state = await analyzeState("8e72pYCDaxu3GqMfeQ5r8wFgoZSYk6oua1Qo9XpsZjX")
+    console.log(state)
+    /*for (let i = 0; i < transactions.length; i++){
       await analyzeTransaction(transactions.at(i)?.signature)
       await new Promise((r) => setTimeout(r, 200)) // wait 5 seconds
-    }
+    }*/
 
     //const transactionId = "3QuLmNK9VLqufnTuwVcAQ3BhYiakT7d1kNEJepz8mR57v6xfsrRvbhu158YRB1EstzhuWbhvQBcFhD8m9ny6bhVu";
 	//await analyzeTransaction(transactionId)
     counter++
     //console.log(counter)
-    if (transactions.length === 1000) await analyzeProgramId(programId, transactions.at(999)?.signature)
+    //if (transactions.length === 1000) await analyzeProgramId(programId, transactions.at(999)?.signature)
   }
   
 
@@ -175,6 +207,7 @@ function App() {
 	//const pubkey = new web3.PublicKey(transactionInfo.transaction.message.accountKeys[0].pubkey._bn)
 	//console.log(pubkey.toString())
 	//checking log message
+    
     if (transactionInfo && transactionInfo.meta && transactionInfo.meta.logMessages) {
 
         const logMessages: string[] = transactionInfo.meta.logMessages
@@ -182,17 +215,25 @@ function App() {
 	    const message: any = transactionInfo.transaction.message
         const accAnalyzation: any = analyzeAccounts(message);
         
-        if(accAnalyzation[0] === false){
-            badAccsCount++;
-            console.log("BAD ACCS DETECTED")
-            console.log(badAccsCount)
-        }
         
-        console.log(accAnalyzation)
+        /*console.log(accAnalyzation)
         console.log(message.instructions[0].accounts.length)
-        console.log(transactionInfo)
+        console.log(transactionInfo)*/
 
     }
+  }
+
+  const analyzeState = async(programId: string) => {
+    const programAccounts = await connection.getProgramAccounts(new web3.PublicKey(programId));
+
+    let isSizeSame = true
+    programAccounts.forEach((program) => {
+        if (program.account.data.length !== 304){
+            isSizeSame = false
+        }
+    })
+    
+    return isSizeSame
   }
 
   const analyzeAccounts = (message: any) => {
@@ -237,17 +278,31 @@ function App() {
   }
 
   const analyzeLogMessages = (logMessages: string[]) => {
+    let returnState = false
+
     logMessages.forEach((logMessage) => {
       uniqueMessages.forEach(uniqueMessage => {
-        if (logMessage?.includes(uniqueMessage)) {
-          //foundProgramIds.push(mainProgramId)
-          console.log(logMessage)
-          //console.log()
-          
+        if (!returnState && logMessage?.includes(uniqueMessage)) {
+          returnState = true
         }
       })
-      //console.log(counter)
+
+      uniqueMessagesSplit.forEach((splitMessages: string[]) => {
+        let splitState = true;
+        splitMessages.forEach((uniqueMessage) => {
+          if (splitState && logMessage?.includes(uniqueMessage)){
+            // contains it, so lets continue
+          }
+          else {
+            splitState = false
+          }
+        })
+        if (splitState) returnState = true
+      })
     })
+
+
+    return returnState
   }
 
   const getNewestProgramIds = async () => {
