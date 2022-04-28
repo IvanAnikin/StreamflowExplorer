@@ -28,11 +28,109 @@ function App() {
     "BONFIDA Governance Token": "5vUBtmmHjSfpY1h24XhzEjRKjDyK5jNL9gT2BfM3wcnb"
   };
 
-  let counter = 0;
+    ///////////////////////////////////////
+    //Streamflow original transactions examples
+    //Create: 5qcpvrv1HdqUg6ZULScgwN2CkeGN9fywgQmgAqkqqcUCgqg2RRa6nQcrtm43rScQUAHgytbzs6QWhdaEeGms2d56
+    //Withdraw: 3qm3dUx4puGDC4YnLPKdxqvZa5U2RmbbGBbWCGConRBCgCRUcCWW4ATtejf9ksp9guk87uPQ3ncdZNVJqqCGUnHK
+    //Transfer: 3G6YW6hrHakHEdbEBb2pBoCWo56WoZKmeyZPnnwCfEdQaDovy27B63KRTWT99nWQURHPdWykomKDe86AFHmAZYaU
+    //Cancel: 4cLjhm9wkzRm6A6Cp4sX8Gd6dYBpALtQ5vayZDNyQpKwkarJnajDKo7eFto3rcrzfJJameWsZVZMPbeeBr9pbWLh
+
+  const instructionStructureCreate = [
+    [true, true],
+    [false, true],
+    [false, true],
+    [false, true],
+    [true, true],
+    [false, true],
+    [false, false],
+    [false, false],
+    [false, false],
+    [false, false],
+    [false, false],
+    [false, false]
+ ]
+
+ const instructionStructureCreate2 = [
+    [true, true],
+    [false, true],
+    [true, true],
+    [false, true],
+    [true, true],
+    [false, true],
+    [false, false],
+    [false, false],
+    [false, false],
+    [false, false],
+    [false, false],
+    [false, false]
+ ]
+
+ const instructionStructureWithdraw = [
+    [true, true],
+    [false, true],
+    [true, true],
+    [false, true],
+    [false, true],
+    [false, true],
+    [false, false],
+    [false, false]
+ ]
+
+ const instructionStructureWithdraw2 = [
+    [true, true],
+    [true, true],
+    [true, true],
+    [false, true],
+    [false, true],
+    [false, true],
+    [false, false],
+    [false, false]
+ ]
+ 
+ const instructionStructureTransfer = [
+    [true, true],
+    [false, true],
+    [false, true],
+    [false, true],
+    [false, true],
+    [false, false],
+    [false, false],
+    [false, false],
+    [false, false],
+    [false, false]
+ ]
+
+ const instructionStructureCancel = [
+    [true, true],
+    [true, true],
+    [false, true],
+    [false, true],
+    [false, true],
+    [false, true],
+    [false, true],
+    [false, false],
+    [false, false]
+ ]
+
+ const instructionStructureCancel2 = [
+    [true, true],
+    [true, true],
+    [false, true],
+    [true, true],
+    [false, true],
+    [false, true],
+    [false, true],
+    [false, false],
+    [false, false]
+ ]
+
   const connection = new web3.Connection(
     web3.clusterApiUrl('mainnet-beta'),
     'confirmed',
   );
+
+  let counter = 0;
+    let badAccsCount = 0;
 
   const getLatestBlock = async() => {
     const blockHeight = await connection.getBlockHeight();
@@ -60,17 +158,11 @@ function App() {
     //const transactionId = "3QuLmNK9VLqufnTuwVcAQ3BhYiakT7d1kNEJepz8mR57v6xfsrRvbhu158YRB1EstzhuWbhvQBcFhD8m9ny6bhVu";
 	//await analyzeTransaction(transactionId)
     counter++
-    console.log(counter)
+    //console.log(counter)
     if (transactions.length === 1000) await analyzeProgramId(programId, transactions.at(999)?.signature)
   }
   
 
-  ///////////////////////////////////////
-  //Streamflow original transactions examples
-  //Cancel: 4cLjhm9wkzRm6A6Cp4sX8Gd6dYBpALtQ5vayZDNyQpKwkarJnajDKo7eFto3rcrzfJJameWsZVZMPbeeBr9pbWLh
-  //Create: 5qcpvrv1HdqUg6ZULScgwN2CkeGN9fywgQmgAqkqqcUCgqg2RRa6nQcrtm43rScQUAHgytbzs6QWhdaEeGms2d56
-  //Transfer: 3G6YW6hrHakHEdbEBb2pBoCWo56WoZKmeyZPnnwCfEdQaDovy27B63KRTWT99nWQURHPdWykomKDe86AFHmAZYaU
-  //Withdraw: 3qm3dUx4puGDC4YnLPKdxqvZa5U2RmbbGBbWCGConRBCgCRUcCWW4ATtejf9ksp9guk87uPQ3ncdZNVJqqCGUnHK
 
   const analyzeTransaction = async( transaction: any ) => {
 
@@ -82,31 +174,61 @@ function App() {
 	//checking log message
     if (transactionInfo && transactionInfo.meta && transactionInfo.meta.logMessages) {
 
-      const logMessages: string[] = transactionInfo.meta.logMessages
-      
-      analyzeLogMessages(logMessages, transaction)
-
-	    const accounts: string[] = transactionInfo.transaction.message.instructions[0].accounts
-      if(accounts.length === 8 || accounts.length === 9 || accounts.length === 10 || accounts.length === 12){
-          
-      }
-      else{
-        console.log("////////////////////////////")
-      }
-        console.log(accounts.length)
+        const logMessages: string[] = transactionInfo.meta.logMessages
+        analyzeLogMessages(logMessages)
+	    const message: any = transactionInfo.transaction.message
+        const accAnalyzation: any = analyzeAccounts(message);
+        
+        if(accAnalyzation[0] === false){
+            badAccsCount++;
+            console.log("BAD ACCS DETECTED")
+            console.log(badAccsCount)
+        }
+        
+        console.log(accAnalyzation)
+        console.log(message.instructions[0].accounts.length)
         console.log(transactionInfo)
+
     }
   }
 
-  const analyzeSignature = (accounts: string[]) => {
-	if(accounts.length === 8) {
-		return true
-	}
-	else{
-		return false
-	}
+  const analyzeAccounts = (message: any) => {
+    if(message.instructions[0].accounts.length === 8 || message.instructions[0].accounts.length === 9 || message.instructions[0].accounts.length === 10 || message.instructions[0].accounts.length === 12){
+
+        //pair instructions with instruction attributes
+        var instructionAttributes = new Array()
+        message.instructions[0].accounts.forEach((instructionAccount: any) => {
+            message.accountKeys.forEach((accountKey: any) => {
+                const a = toString()
+                if(JSON.stringify(accountKey.pubkey._bn.words) === JSON.stringify(instructionAccount._bn.words)){
+                    instructionAttributes.push([accountKey.signer, accountKey.writable])
+                }
+            })
+        })
+
+        //check if instruction structure fits any streamflow transaction
+        switch(JSON.stringify(instructionAttributes)){
+            case JSON.stringify(instructionStructureCreate):
+                return [true, "create"]
+            case JSON.stringify(instructionStructureCreate2):
+                return [true, "create"]
+            case JSON.stringify(instructionStructureWithdraw):
+                return [true, "withdraw"]
+            case JSON.stringify(instructionStructureWithdraw2):
+                return [true, "withdraw"]
+            case JSON.stringify(instructionStructureTransfer):
+                return [true, "transfer"]
+            case JSON.stringify(instructionStructureCancel):
+                return [true, "cancel"]
+            case JSON.stringify(instructionStructureCancel2):
+                return [true, "cancel"]
+            default:
+                return [false, instructionAttributes]
+        }
+        
 	/*accounts.forEach((account) => {
 	})*/
+    }
   }
 
   const getPubkeyFromKey = (accountKey: string) => {
@@ -114,12 +236,12 @@ function App() {
     return pubkey.toString()
   }
 
-  const analyzeLogMessages = (logMessages: string[], transactionId?: string) => {
+  const analyzeLogMessages = (logMessages: string[]) => {
     logMessages.forEach((logMessage) => {
       uniqueMessages.forEach(uniqueMessage => {
         if (logMessage?.includes(uniqueMessage)) {
           //foundProgramIds.push(mainProgramId)
-          if (transactionId)console.log(logMessage + "     + " + transactionId)
+          console.log(logMessage)
           //console.log()
           
         }
