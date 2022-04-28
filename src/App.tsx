@@ -9,7 +9,34 @@ function App() {
   foundProgramIds.pop();
 
   const uniqueMessages = [
-    "Instruction: Create"
+    "Initializing SPL token stream",
+    "Error: Given timestamps are invalid",
+    "Error: Insufficient funds in ", // + acc.sender.key
+    "Error: Insufficient tokens in sender's wallet",
+    "Initializing recipient's associated token account",
+    "Creating account for holding metadata",
+    "Creating account for holding tokens",
+    "Initializing escrow account for ", // + acc.mint.key token
+    "Moving funds into escrow account",
+    "Successfully initialized ", // + {} {} token stream for {}
+    "Called by ", // + acc.sender.key
+    "Metadata written in ", // + acc.metadata.key
+    "Funds locked in ", // + acc.escrow_tokens.key
+    "Stream duration is ", // + pretty_time(metadata.ix.end_time - metadata.ix.start_time)
+    "Cliff happens at ", // + pretty_time(metadata.ix.cliff));
+    "Withdrawing from SPL token stream",
+    "Error: Metadata does not match given accounts",
+    "Amount requested for withdraw is more than what is available",
+    "Returning ", // + {} lamports (rent) to {}
+    "Withdrawn ", // + : {} {} tokens",
+    "Remaining: ", // + {} {} tokens",
+    "Cancelling SPL token stream",
+    "Transferred: ", // + {} {} tokens
+    "Returned: ", // + {} {} tokens
+    "Returned rent: ", // + {} lamports"
+    "Transferring stream recipient",
+    "Error: Insufficient funds in ", // {}",
+    "Initializing new recipient's associated token account",
   ]
 
   const blacklistedProgramIds = [
