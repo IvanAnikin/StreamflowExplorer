@@ -205,7 +205,7 @@ function App() {
 	//console.log(transactionInfo)
 	//checking acc count
 	//const pubkey = new web3.PublicKey(transactionInfo.transaction.message.accountKeys[0].pubkey._bn)
-	//console.log(pubkey.toString())
+	//console.log(pubkey.toString())sdf
 	//checking log message
     
     if (transactionInfo && transactionInfo.meta && transactionInfo.meta.logMessages) {
