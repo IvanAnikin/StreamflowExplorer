@@ -28,12 +28,13 @@ function App() {
     "BONFIDA Governance Token": "5vUBtmmHjSfpY1h24XhzEjRKjDyK5jNL9gT2BfM3wcnb"
   };
 
-    ///////////////////////////////////////
     //Streamflow original transactions examples
+    //////////////////////////////////////////////////////////////////////////////////////////////////
     //Create: 5qcpvrv1HdqUg6ZULScgwN2CkeGN9fywgQmgAqkqqcUCgqg2RRa6nQcrtm43rScQUAHgytbzs6QWhdaEeGms2d56
     //Withdraw: 3qm3dUx4puGDC4YnLPKdxqvZa5U2RmbbGBbWCGConRBCgCRUcCWW4ATtejf9ksp9guk87uPQ3ncdZNVJqqCGUnHK
     //Transfer: 3G6YW6hrHakHEdbEBb2pBoCWo56WoZKmeyZPnnwCfEdQaDovy27B63KRTWT99nWQURHPdWykomKDe86AFHmAZYaU
     //Cancel: 4cLjhm9wkzRm6A6Cp4sX8Gd6dYBpALtQ5vayZDNyQpKwkarJnajDKo7eFto3rcrzfJJameWsZVZMPbeeBr9pbWLh
+    //////////////////////////////////////////////////////////////////////////////////////////////////
 
   const instructionStructureCreate = [
     [true, true],
@@ -150,6 +151,8 @@ function App() {
     //const programInfo = await connection.getAccountInfo(new web3.PublicKey(programId))
     const transactions = await connection.getConfirmedSignaturesForAddress2(new web3.PublicKey(programId), { before: previousId })
 
+    const programInfo = await connection.getProgramAccounts(new web3.PublicKey(programId));
+    console.log(programInfo)
     for (let i = 0; i < transactions.length; i++){
       await analyzeTransaction(transactions.at(i)?.signature)
       await new Promise((r) => setTimeout(r, 200)) // wait 5 seconds
@@ -225,9 +228,6 @@ function App() {
             default:
                 return [false, instructionAttributes]
         }
-        
-	/*accounts.forEach((account) => {
-	})*/
     }
   }
 
