@@ -198,31 +198,36 @@ function App() {
   }
   
 
-
+  /**
+   * 
+   * @param transaction 
+   * @returns true if its possible streamflow fork transaction
+   *          false if its random other transaction
+   */
   const analyzeTransaction = async( transaction: any ) => {
-
     const transactionInfo = typeof transaction === "string" ? await connection.getParsedTransaction(transaction) : transaction
-	//console.log(transactionInfo)
-	//checking acc count
-	//const pubkey = new web3.PublicKey(transactionInfo.transaction.message.accountKeys[0].pubkey._bn)
-	//console.log(pubkey.toString())sdf
-	//checking log message
     
     if (transactionInfo && transactionInfo.meta && transactionInfo.meta.logMessages) {
 
         const logMessages: string[] = transactionInfo.meta.logMessages
-        analyzeLogMessages(logMessages)
+        const analyzedLogMessages = analyzeLogMessages(logMessages)
 	    const message: any = transactionInfo.transaction.message
         const accAnalyzation: any = analyzeAccounts(message);
-        
-        
-        /*console.log(accAnalyzation)
-        console.log(message.instructions[0].accounts.length)
-        console.log(transactionInfo)*/
 
+        if(analyzedLogMessages || accAnalyzation[0])
+        {
+            return true
+        }
+        else
+            return false
     }
   }
-
+  /**
+   *  
+   * @param programId checks if program has same structure
+   * @returns true if does
+   * 
+   */
   const analyzeState = async(programId: string) => {
     const programAccounts = await connection.getProgramAccounts(new web3.PublicKey(programId));
 
