@@ -18,7 +18,6 @@ function App() {
     "Creating account for holding tokens",
     "Initializing escrow account for ", // + acc.mint.key token
     "Moving funds into escrow account",
-    "Successfully initialized ", // + {} {} token stream for {}
     "Called by ", // + acc.sender.key
     "Metadata written in ", // + acc.metadata.key
     "Funds locked in ", // + acc.escrow_tokens.key
@@ -27,16 +26,22 @@ function App() {
     "Withdrawing from SPL token stream",
     "Error: Metadata does not match given accounts",
     "Amount requested for withdraw is more than what is available",
-    "Returning ", // + {} lamports (rent) to {}
-    "Withdrawn ", // + : {} {} tokens",
-    "Remaining: ", // + {} {} tokens",
+   
+    
     "Cancelling SPL token stream",
-    "Transferred: ", // + {} {} tokens
-    "Returned: ", // + {} {} tokens
-    "Returned rent: ", // + {} lamports"
+    
     "Transferring stream recipient",
     "Error: Insufficient funds in ", // {}",
     "Initializing new recipient's associated token account",
+  ]
+  const uniqueMessagesSplit = [
+    ["Successfully initialized ", " token stream for "],
+    [ "Returning ", " lamports ", " to "],
+    ["Withdrawn: ", " tokens"],
+    ["Remaining: ", " tokens"],
+    ["Transferred: ", " tokens"],
+    ["Returned: ", " tokens"],
+    ["Returned rent: ", " lamports"]
   ]
 
   const blacklistedProgramIds = [
@@ -180,6 +185,12 @@ function App() {
 
     const programInfo = await connection.getProgramAccounts(new web3.PublicKey(programId));
     console.log(programInfo)
+
+    programInfo.forEach((program) => {
+      console.log(new web3.PublicKey(program.pubkey).toString())
+    })
+
+
     for (let i = 0; i < transactions.length; i++){
       await analyzeTransaction(transactions.at(i)?.signature)
       await new Promise((r) => setTimeout(r, 200)) // wait 5 seconds
@@ -264,17 +275,31 @@ function App() {
   }
 
   const analyzeLogMessages = (logMessages: string[]) => {
+    let returnState = false
+
     logMessages.forEach((logMessage) => {
       uniqueMessages.forEach(uniqueMessage => {
-        if (logMessage?.includes(uniqueMessage)) {
-          //foundProgramIds.push(mainProgramId)
-          console.log(logMessage)
-          //console.log()
-          
+        if (!returnState && logMessage?.includes(uniqueMessage)) {
+          returnState = true
         }
       })
-      //console.log(counter)
+
+      uniqueMessagesSplit.forEach((splitMessages: string[]) => {
+        let splitState = true;
+        splitMessages.forEach((uniqueMessage) => {
+          if (splitState && logMessage?.includes(uniqueMessage)){
+            // contains it, so lets continue
+          }
+          else {
+            splitState = false
+          }
+        })
+        if (splitState) returnState = true
+      })
     })
+
+
+    return returnState
   }
 
   const getNewestProgramIds = async () => {
