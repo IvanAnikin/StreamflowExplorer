@@ -490,7 +490,7 @@ function App() {
     const things: Array<JSX.Element> = []
     for(const forkedProgram of foundProgramIds){
        things.push( <div className={styles.tableRow}>		
-        <div className={styles.tableData}>{forkedProgram.programId.substring(0, 15) + ".."}</div>
+        <div className={styles.tableData}>{forkedProgram.programId}</div>
         <div className={styles.tableData}>{forkedProgram.ownerId.substring(0, 15) + ".."}</div>
         <div className={styles.tableData}>{forkedProgram.isFork.toString()}</div>
       </div>
