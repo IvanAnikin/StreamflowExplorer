@@ -12,9 +12,9 @@
 
 .bodyOn{
   font-family: inter, sans-serif;
-  background-image: linear-gradient(144deg,#802bbd, #4332b6 50%,#1e8a92);
+  background-color: #4332b6;
   display: flex;
-  height: calc(100vh - 82px);
+  height: 100vh;
   flex-direction: column;
 }
 .bodyOff{
@@ -127,9 +127,6 @@ $color-form-highlight: #EEEEEE;
 	width:100%;
 	padding:($half-spacing-unit * 1.5) 0;
 	
-	&:nth-of-type(odd) {
-		background:$color-form-highlight;
-	}
 }
 
 .tableData, .headerItem {
