@@ -1,4 +1,5 @@
-import './App.css';
+
+import styles from './App.module.scss'; 
 import * as web3 from '@solana/web3.js';
 import { hasSelectionSupport } from '@testing-library/user-event/dist/utils';
 import { AccountStructureDto } from '../DTO/AccountStructureDto'
@@ -472,10 +473,11 @@ function App() {
   return (
     <div className="App">
         <header className="App-header">
-            <h1>Explore Solana network - F12 Console</h1>
+            <h1>Streamflow Explorer</h1>
         </header>
         <body>
-            <div className='form-group' id="input_form">
+            <div className="Buttons">
+                <button className ={styles.button} role="button"><span className={styles.span}>Button 64</span></button>
                 <button type='button' onClick={getNewestProgramIds}>Get newest program ids</button>
                 <button type='button' onClick={stopSearching}>Stop searching</button>
             </div>
