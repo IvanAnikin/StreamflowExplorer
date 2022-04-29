@@ -5,11 +5,12 @@ import { hasSelectionSupport } from '@testing-library/user-event/dist/utils';
 import { AccountStructureDto } from '../DTO/AccountStructureDto'
 import { ExecutableProgramDto } from '../DTO/ExecutableProgramDto'
 import { ProgramDto } from '../DTO/ProgramDto';
+import { ForkedProgramDto } from "../DTO/ForkedProgramDto"
 
 
 function App() {
 
-  let foundProgramIds: Array<string> = []
+  let foundProgramIds: Array<ForkedProgramDto> = []
 
   //#region unique messages
   const uniqueMessages = [
@@ -187,6 +188,7 @@ function App() {
   }
 
   
+  
 
 
   /**
@@ -223,8 +225,6 @@ function App() {
    */
   const analyzeTransaction = async( transaction: any ) => {
     const transactionInfo = typeof transaction === "string" ? await connection.getParsedTransaction(transaction) : transaction
-    //console.log(transactionInfo)
-    
 
     const logMessages: string[] = transactionInfo.meta.logMessages
     const analyzedLogMessages = analyzeLogMessages(logMessages)
@@ -406,20 +406,28 @@ function App() {
             }
           }
 
-          console.log(executablePrograms)
+          console.log(executableProgramsCounter + " <=======")
 
-          if (isFork && transaction){
+
+
+          if (transaction && !includesProgramId(foundProgramIds, transaction.transaction.message.accountKeys.toString())){
             const programId = await findExecutableProgram(transaction.transaction.message.accountKeys)
-            
 
+            if (programId) {
+              await new Promise((r) => setTimeout(r, 1000)) // wait 1 second
+              const programInfo = await connection.getAccountInfo(programId)
 
-            // Add to the database
+               const newForkedProgram: ForkedProgramDto = programInfo ? 
+                  { programId: programId.toString(), ownerId: programInfo?.owner.toString(), isFork: isFork } : 
+                  { programId: programId.toString(), ownerId: "", isFork: isFork }
 
-            // 
+              foundProgramIds.push(newForkedProgram)
 
-            //
+              // Update UI
 
-            //
+              // Add to the database
+
+            }
           }
         }
         
@@ -437,10 +445,15 @@ function App() {
   }
 
   const findExecutableProgram = async(accountIds: Array<web3.PublicKey>) => {
-
-    // to be completed
-    
-    accountIds.forEach(() => {})
+    for (const accountKey of accountIds){
+     
+        await new Promise((r) => setTimeout(r, 200)) // wait 0.2 seconds
+        const accountInfo = await connection.getAccountInfo(accountKey)
+        if (accountInfo?.executable) {
+          return accountKey
+        }
+      
+    }
   }
 
   /**
