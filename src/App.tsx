@@ -6,7 +6,6 @@ import { ExecutableProgramDto } from '../DTO/ExecutableProgramDto'
 import { ProgramDto } from '../DTO/ProgramDto';
 
 
-
 function App() {
 
   let foundProgramIds: Array<string> = []
@@ -529,22 +528,15 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>Explore Solana network - F12 Console</h1>
-        <div className='form-group' id="input_form">
-          <input type="text" className="form-control" id="search_field" name="search_field" placeholder='Account name or ID'></input>
-          <button type="button" onClick={search} id="btn" className='btn btn-light'>Search</button>
-          <button type="button" onClick={get_interesting} id="btn2" className='btn btn-light'>Get saved interesting accounts</button>¨
-          <br></br>
-          <h1>Other usefull methods:</h1>
-          <button type='button' onClick={getNewestProgramIds}>Get newest program ids</button>
-          <button type='button' onClick={printSavedProgramIds}>Print saved program ids</button>
-          <button type='button' onClick={analyzeStreamflow}>Analyze Streamflow program</button>
-          <button type='button' onClick={stopSearching}>Stop searching</button>
-
-
-        </div>
-      </header>
+        <header className="App-header">
+            <h1>Explore Solana network - F12 Console</h1>
+        </header>
+        <body>
+            <div className='form-group' id="input_form">
+                <button type='button' onClick={getNewestProgramIds}>Get newest program ids</button>
+                <button type='button' onClick={stopSearching}>Stop searching</button>
+            </div>
+        </body>
     </div>
   );
 }
