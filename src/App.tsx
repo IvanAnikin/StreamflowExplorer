@@ -8,6 +8,7 @@ function App() {
   let foundProgramIds = [""]
   foundProgramIds.pop();
 
+  //#region unique messages
   const uniqueMessages = [
     "Initializing SPL token stream",
     "Error: Given timestamps are invalid",
@@ -43,6 +44,7 @@ function App() {
     ["Returned: ", " tokens"],
     ["Returned rent: ", " lamports"]
   ]
+  //#endregion
 
   const blacklistedProgramIds = [
     "11111111111111111111111111111111",
@@ -68,6 +70,7 @@ function App() {
     //Cancel: 4cLjhm9wkzRm6A6Cp4sX8Gd6dYBpALtQ5vayZDNyQpKwkarJnajDKo7eFto3rcrzfJJameWsZVZMPbeeBr9pbWLh
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
+  //#region Streamflow InstructionStructure
   const instructionStructureCreate = [
     [true, true],
     [false, true],
@@ -82,7 +85,7 @@ function App() {
     [false, false],
     [false, false]
  ]
-
+ 
  const instructionStructureCreate2 = [
     [true, true],
     [false, true],
@@ -156,6 +159,7 @@ function App() {
     [false, false],
     [false, false]
  ]
+ //#endregion
 
   const connection = new web3.Connection(
     web3.clusterApiUrl('mainnet-beta'),
@@ -163,13 +167,14 @@ function App() {
   );
 
   let counter = 0;
-    let badAccsCount = 0;
+  let badAccsCount = 0;
 
-  const getLatestBlock = async() => {
-    const blockHeight = await connection.getBlockHeight();
-    return blockHeight;
-  } 
 
+
+  /**
+   * This is just a helper method
+   * Analyzes StreamFlow address
+   */
   const analyzeStreamflow = async() => {
     const programId = "8e72pYCDaxu3GqMfeQ5r8wFgoZSYk6oua1Qo9XpsZjX"
     await analyzeProgramId(programId)
@@ -178,7 +183,12 @@ function App() {
   
 
 
-
+  /**
+   * searches up to 1000 program transactions and then analyzes them -> if there are more then 1000 transactions, it calles it self again in recursion until it finds them all
+   * 
+   * @param programId
+   * @param previousId The signature to start searching from
+   */
   const analyzeProgramId = async(programId: string, previousId?: string) => {
     //const programInfo = await connection.getAccountInfo(new web3.PublicKey(programId))
     const transactions = await connection.getConfirmedSignaturesForAddress2(new web3.PublicKey(programId), { before: previousId })
@@ -199,10 +209,10 @@ function App() {
   
 
   /**
+   * Analyzes the individual transactions and it's properties 
    * 
-   * @param transaction 
-   * @returns true if its possible streamflow fork transaction
-   *          false if its random other transaction
+   * @param transaction either string address or the whole transactions with all it's data
+   * @return true if possible fork
    */
   const analyzeTransaction = async( transaction: any ) => {
     const transactionInfo = typeof transaction === "string" ? await connection.getParsedTransaction(transaction) : transaction
@@ -223,10 +233,10 @@ function App() {
     }
   }
   /**
-   *  
-   * @param programId checks if program has same structure
-   * @returns true if does
+   * Checks if program has same structure (size in bytes)
    * 
+   * @param programId
+   * @returns true if size is the same
    */
   const analyzeState = async(programId: string) => {
     const programAccounts = await connection.getProgramAccounts(new web3.PublicKey(programId));
@@ -241,6 +251,16 @@ function App() {
     return isSizeSame
   }
 
+  /**
+   * Analyzes program's signatures 
+   * - if Account count coresponds to the Original
+   * - then if the props @signer and @writable have the same ordering
+   *  
+   * @param message 
+   * @returns
+   * 0. true if possible fork
+   * 1. string saying which instruction it is
+   */
   const analyzeAccounts = (message: any) => {
     if(message.instructions[0].accounts.length === 8 || message.instructions[0].accounts.length === 9 || message.instructions[0].accounts.length === 10 || message.instructions[0].accounts.length === 12){
 
@@ -277,11 +297,12 @@ function App() {
     }
   }
 
-  const getPubkeyFromKey = (accountKey: string) => {
-    const pubkey = new web3.PublicKey(accountKey)
-    return pubkey.toString()
-  }
-
+  /**
+   * Analyzes of at least one of the uniqueLogMessages is contained in these logMessages
+   * 
+   * @param logMessages Array of all logMessages of a transaction
+   * @returns true if contains
+   */
   const analyzeLogMessages = (logMessages: string[]) => {
     let returnState = false
 
@@ -306,13 +327,17 @@ function App() {
       })
     })
 
-
     return returnState
   }
 
-  const getNewestProgramIds = async () => {
-    
 
+  /**
+   * Tries to get as many new Blocks as possible
+   * Then analyzes them based on their transactions respectively 
+   * 
+   * @ToBeAdded registering data to a Database
+   */
+  const getNewestProgramIds = async () => {
     for (let i = 0; i < 1000 /*100*/; i++){
       const block = await connection.getBlockHeight();
       console.log("Block height: " + block);
@@ -322,27 +347,17 @@ function App() {
 
         if (blockInfo) for (let transationIndex = 0; transationIndex < blockInfo?.transactions.length; transationIndex++){
           const transaction = blockInfo?.transactions.at(transationIndex)
-          let foundAccounts = [""]
           
           analyzeTransaction(transaction)
-
-         
         }
-
-
-        
       }
       catch (error){
         console.log("ERROR")
       }
-      
+
       console.log(foundProgramIds.length);
 
-
-      
-
       //await new Promise((r) => setTimeout(r, 5000)) // wait 5 seconds
-
     }
   }
 
