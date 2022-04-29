@@ -493,6 +493,23 @@ function App() {
                 <button className ={styles.button} role="button" onClick={getNewestProgramIds}><span className={styles.span}>Get newest program ids</span></button>
                 <button className ={styles.button} role="button" onClick={stopSearching}><span className={styles.span}>Stop searching</span></button>
             </div>
+            <div className="container">
+	
+	<div className={styles.table}>
+		<div className={styles.tableHeader}>
+			<div className={styles.headerItem}><a>programId</a></div>
+			<div className={styles.headerItem}><a>ownerId</a></div>
+			<div className={styles.headerItem}><a>isFork </a></div>
+		</div>
+		<div className={styles.tableContent}>	
+			<div className={styles.tableRow}>		
+				<div className={styles.tableData}>Tom</div>
+				<div className={styles.tableData}>2</div>
+				<div className={styles.tableData}>0</div>
+			</div>
+		</div>	
+	</div>
+</div>
         </body>
     </div>
   );

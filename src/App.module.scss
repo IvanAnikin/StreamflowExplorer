@@ -13,7 +13,7 @@ body {
 }
 
 .buttons {
-  padding-top: 350px;
+  padding-top: 300px;
   margin-left: auto;
   margin-right: auto;
   display: flex;
@@ -53,7 +53,7 @@ body {
 }
 
 .button span {
-  background-color: rgb(39, 40, 73);
+  background-color: rgb(30, 30, 49);
   padding: 16px 24px;
   border-radius: 6px;
   width: 100%;
@@ -72,8 +72,81 @@ body {
   }
 }
 
-h1 {
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700');
+
+$base-spacing-unit: 24px;
+$half-spacing-unit: $base-spacing-unit / 2;
+
+$color-alpha: #1772FF;
+$color-form-highlight: #EEEEEE;
+
+*, *:before, *:after {
+	box-sizing:border-box;
+}
+
+
+.container {
+	max-width: 1000px;
+	margin-right:auto;
+	margin-left:auto;
+	display:flex;
+	justify-content:center;
+	align-items:center;
+	min-height:100vh;
+}
+
+.table {
+  margin-top: 20%;
+	width:100%;
+  th:first-of-type {
+    border-top-left-radius: 10px;
+  }
+  th:last-of-type {
+    border-top-right-radius: 10px;
+  }
+  tr:last-of-type td:first-of-type {
+    border-bottom-left-radius: 10px;
+  }
+  tr:last-of-type td:last-of-type {
+    border-bottom-right-radius: 10px;
+  }
+	border:1px solid $color-form-highlight;
+}
+
+.tableHeader {
+	display:flex;
+	width:100%;
+	background:rgb(30, 30, 49);
+	padding:($half-spacing-unit * 1.5) 0;
+}
+
+.tableRow {
+	display:flex;
+	width:100%;
+	padding:($half-spacing-unit * 1.5) 0;
+	
+	&:nth-of-type(odd) {
+		background:$color-form-highlight;
+	}
+}
+
+.tableData, .headerItem {
+	flex: 1 1 20%;
+	text-align:center;
+}
+
+.headerItem {
+	text-transform:uppercase;
   color:white;
+}
+
+.headerText {
+  color: #00DDEB;
+}
+	
+
+h1 {
+  
   margin-top: 20px;
   margin-left: 20px;
   font-family: inter, sans-serif;
