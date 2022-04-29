@@ -6,9 +6,12 @@ import { AccountStructureDto } from '../DTO/AccountStructureDto'
 import { ExecutableProgramDto } from '../DTO/ExecutableProgramDto'
 import { ProgramDto } from '../DTO/ProgramDto';
 import { ForkedProgramDto } from "../DTO/ForkedProgramDto"
+import { useState } from 'react';
 
 
 function App() {
+
+  const [background, changeBackground] = useState(styles.bodyOff)
 
   let foundProgramIds: Array<ForkedProgramDto> = []
 
@@ -50,11 +53,11 @@ function App() {
   ]
   //#endregion
 
-  const blacklistedProgramIds = [
-    "11111111111111111111111111111111",
-    "Config1111111111111111111111111111111111111",
-    "Vote111111111111111111111111111111111111111",
-    "Stake11111111111111111111111111111111111111"
+  const blacklistedProgramIds: Array<ProgramDto> = [
+    { programId: "11111111111111111111111111111111" },
+    { programId: "Config1111111111111111111111111111111111111" },
+    { programId: "Vote111111111111111111111111111111111111111" },
+    { programId: "Stake11111111111111111111111111111111111111" }
   ]
 
   const interesting_ids = {
@@ -362,7 +365,6 @@ function App() {
     return returnState
   }
 
-
   /**
    * Tries to get as many new Blocks as possible
    * Then analyzes them based on their transactions respectively 
@@ -370,6 +372,8 @@ function App() {
    * @ToBeAdded registering data to a Database
    */
   const getNewestProgramIds = async () => {
+    changeBackground(styles.bodyOn)
+
     searching = true
     const oneTime = false // change to false if you want this to run non-stop
 
@@ -392,7 +396,7 @@ function App() {
 
           
           if (!isFork) for (const accountKey of transaction?.transaction.message.accountKeys){
-            if (!includesProgramId(executablePrograms, accountKey.toString()) && !isFork){
+            if (!includesProgramId(executablePrograms, accountKey.toString()) && !includesProgramId(blacklistedProgramIds, accountKey.toString()) && !isFork){
               await new Promise((r) => setTimeout(r, 200)) // wait 0.2 seconds
               const accountInfo = await connection.getAccountInfo(accountKey)
               if (accountInfo?.executable) {
@@ -401,12 +405,12 @@ function App() {
                 isFork = await analyzeState(accountKey)
                 executableProgramsCounter++
                 console.log(executableProgramsCounter + " <-")
-                
               }
             }
           }
 
-          console.log(executableProgramsCounter + " <=======")
+          //const programId = await findExecutableProgram(transaction.transaction.message.accountKeys)
+          //if (!programId) console.log("<<<<<<<<<<<<<<<<<<<<< It does not have it >>>>>>>>>>>>>>")
 
 
 
@@ -447,7 +451,7 @@ function App() {
   const findExecutableProgram = async(accountIds: Array<web3.PublicKey>) => {
     for (const accountKey of accountIds){
      
-        await new Promise((r) => setTimeout(r, 200)) // wait 0.2 seconds
+        await new Promise((r) => setTimeout(r, 100)) // wait 0.1 seconds
         const accountInfo = await connection.getAccountInfo(accountKey)
         if (accountInfo?.executable) {
           return accountKey
@@ -477,6 +481,7 @@ function App() {
   }
 
   const stopSearching = () => {
+    changeBackground(styles.bodyOff)
     searching = false;
     console.log("searching stopped")
   }
@@ -484,16 +489,17 @@ function App() {
 
 
   return (
-    <div className="App">
-        <header className="App-header">
+    <div className={styles.app}>
+        <header className={styles.AppHeader}>
             <h1>Streamflow Explorer</h1>
         </header>
-        <body>
+        <body className={background}>
             <div className={styles.buttons}>
                 <button className ={styles.button} role="button" onClick={getNewestProgramIds}><span className={styles.span}>Get newest program ids</span></button>
                 <button className ={styles.button} role="button" onClick={stopSearching}><span className={styles.span}>Stop searching</span></button>
             </div>
         </body>
+        
     </div>
   );
 }
