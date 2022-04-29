@@ -205,7 +205,6 @@ function App() {
 
     for (let i = 0; i < transactions.length; i++){
       await analyzeTransaction(transactions.at(i)?.signature)
-      await new Promise((r) => setTimeout(r, 200)) // wait 0.2 seconds
     }
 
     //const transactionId = "3QuLmNK9VLqufnTuwVcAQ3BhYiakT7d1kNEJepz8mR57v6xfsrRvbhu158YRB1EstzhuWbhvQBcFhD8m9ny6bhVu";
@@ -257,6 +256,8 @@ function App() {
    */
   const analyzeState = async(programId: web3.PublicKey) => {
 
+    console.log("Waiting 0.5 seconds")
+    await new Promise((r) => setTimeout(r, 500)) // wait 0.5 seconds
     const programAccounts = await connection.getProgramAccounts(programId);
 
     let isSizeSame = true
@@ -288,9 +289,8 @@ function App() {
     for (let i = 0; i < message.instructions.length; i++){
       if(message.instructions[i].accounts.length === 8 || message.instructions[i].accounts.length === 9 || message.instructions[i].accounts.length === 10 || message.instructions[i].accounts.length === 12){
 
+        await new Promise((r) => setTimeout(r, 200)) // wait 0.2 seconds
         const transactionInfo = await connection.getParsedTransaction(transactionId)
-        console.log("waiting 1 second")
-        await new Promise((r) => setTimeout(r, 1000)) // wait 1 seconds
         
 
         const messageWithAllInfo: any = transactionInfo?.transaction.message
@@ -298,7 +298,6 @@ function App() {
         let instructionAttributes = new Array()
 
         //console.log(message.instructions[i].accounts.length + "        " + message.accountKeys.length)
-
         
         if (messageWithAllInfo.instructions[i].accounts) messageWithAllInfo.instructions[i].accounts.forEach((instructionAccount: any) => {
           messageWithAllInfo.accountKeys.forEach((accountKey: any) => {
@@ -307,9 +306,6 @@ function App() {
             }
           })
         })
-        
-        
-          
 
         //check if instruction structure fits any streamflow transaction
         switch(JSON.stringify(instructionAttributes)){
@@ -375,7 +371,7 @@ function App() {
    */
   const getNewestProgramIds = async () => {
     searching = true
-    const oneTime = true 
+    const oneTime = false // change to false if you want this to run non-stop
 
     while(searching){
 
@@ -385,39 +381,41 @@ function App() {
       try {
         const blockInfo = await connection.getBlock(block);
 
-        console.log("waiting 5 secs")
-        await new Promise((r) => setTimeout(r, 5000)) // wait 5 seconds
         
         
 
-        if (blockInfo) for (let transationIndex = 0; transationIndex < blockInfo?.transactions.length; transationIndex++){
-          const transaction = blockInfo?.transactions.at(transationIndex)
+        if (blockInfo) for (const transaction of blockInfo?.transactions){
           
           console.log("analyzeTransaction")
-          await new Promise((r) => setTimeout(r, 5000)) // wait 5 seconds
-          
           let isFork = await analyzeTransaction(transaction)
           let executableProgramsCounter = 0;
 
-          if (!isFork) transaction?.transaction.message.accountKeys.forEach(async(accountKey) => {
+          
+          if (!isFork) for (const accountKey of transaction?.transaction.message.accountKeys){
             if (!includesProgramId(executablePrograms, accountKey.toString()) && !isFork){
+              await new Promise((r) => setTimeout(r, 200)) // wait 0.2 seconds
               const accountInfo = await connection.getAccountInfo(accountKey)
               if (accountInfo?.executable) {
+                console.log("analyzeState")
+
                 isFork = await analyzeState(accountKey)
                 executableProgramsCounter++
+                console.log(executableProgramsCounter + " <-")
+                
               }
             }
-          });
+          }
 
+          console.log(executablePrograms)
 
           if (isFork && transaction){
-            const programId = findExecutableProgram(transaction.transaction.message.accountKeys)
+            const programId = await findExecutableProgram(transaction.transaction.message.accountKeys)
             
 
 
             // Add to the database
 
-            //
+            // 
 
             //
 
@@ -453,9 +451,9 @@ function App() {
    * @returns true if programs include programId
    */
   const includesProgramId = (programs: Array<ProgramDto>, findProgramId: string) => {
-    programs.forEach((program) => {
+    for (const program of programs){
       if (program.programId === findProgramId) return true
-    })
+    }
     return false
   }
 
@@ -471,61 +469,6 @@ function App() {
   }
   
 
-  const get_interesting = async () => {
-    for (let [key, value] of Object.entries(interesting_ids)) {
-      console.log("Searching for '" + key + "' with id = '" + value + "'")
-      
-      var pub_key = value as string; 
-      let account = await connection.getAccountInfo(new web3.PublicKey(pub_key));
-      console.log("Account info:");
-      console.log(account);
-      let programAccounts = await connection.getProgramAccounts(new web3.PublicKey(pub_key));
-      console.log("Program accounts:");
-      console.log(programAccounts);
-      //let parsedTransactions = await connection.getParsedTransactions(new web3.PublicKey(value_var));
-      //let transactionCount = await connection.getTransactionCount(new web3.PublicKey(value_var));
-      //let confirmedTransactions = await connection.GetConfirmedTransaction(new web3.PublicKey(value_var));
-      //console.log("Confirmed transactions:");
-      //console.log(confirmedTransactions);
-
-
-      await new Promise((r) => setTimeout(r, 5000)) // wait 5 seconds
-    }
-    console.log("Finished 'get_interesting' function")
-  }
-
-  const search = async () => {
-
-    var search_field = document.getElementById("search_field") as HTMLInputElement;
-    var search_field_val = search_field.value as string;
-    for (let [key, value] of Object.entries(interesting_ids)) {
-      if(search_field_val === key){
-        search_field_val=value;
-      }
-    }
-    console.log("Searching for: '" + search_field_val + "'");
-    
-    var connection = new web3.Connection(
-      web3.clusterApiUrl('mainnet-beta'),
-      'confirmed',
-    );
-    const slot = await connection.getSlot();
-    console.log("Actual slot: " + slot)
-    for (let i = 0; i < 10; i++){
-      const currentSlot = slot - i;
-      const block = await connection.getBlock(currentSlot);
-      console.log(block)
-    }
-    const block = await connection.getBlocks(slot-10, slot);
-    console.log("Block: " + block)
-    let account = await connection.getAccountInfo(new web3.PublicKey(search_field_val)); 
-    console.log("Account info:");
-    console.log(account);
-    let programAccounts = await connection.getProgramAccounts(new web3.PublicKey(search_field_val));
-    console.log("Program accounts:");
-    console.log(programAccounts);
-    console.log("Finished 'search' function")
-  };
 
   return (
     <div className="App">
@@ -533,14 +476,15 @@ function App() {
         <h1>Explore Solana network - F12 Console</h1>
         <div className='form-group' id="input_form">
           <input type="text" className="form-control" id="search_field" name="search_field" placeholder='Account name or ID'></input>
-          <button type="button" onClick={search} id="btn" className='btn btn-light'>Search</button>
-          <button type="button" onClick={get_interesting} id="btn2" className='btn btn-light'>Get saved interesting accounts</button>¨
+          {/*<button type="button" onClick={search} id="btn" className='btn btn-light'>Search</button>
+          <button type="button" onClick={get_interesting} id="btn2" className='btn btn-light'>Get saved interesting accounts</button>*/}
           <br></br>
           <h1>Other usefull methods:</h1>
           <button type='button' onClick={getNewestProgramIds}>Get newest program ids</button>
           <button type='button' onClick={printSavedProgramIds}>Print saved program ids</button>
           <button type='button' onClick={analyzeStreamflow}>Analyze Streamflow program</button>
           <button type='button' onClick={stopSearching}>Stop searching</button>
+
 
 
         </div>
