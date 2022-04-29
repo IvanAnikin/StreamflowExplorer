@@ -493,9 +493,9 @@ function App() {
     const things: Array<JSX.Element> = []
     for(const forkedProgram of foundProgramIds){
        things.push( <div className={styles.tableRow}>		
-        <div className={styles.tableData}>forkedProgram.programId</div>
-        <div className={styles.tableData}>forkedProgram.ownerId</div>
-        <div className={styles.tableData}>forkedProgram.isFork</div>
+        <div className={styles.tableData}>{forkedProgram.programId}</div>
+        <div className={styles.tableData}>{forkedProgram.ownerId}</div>
+        <div className={styles.tableData}>{forkedProgram.isFork}</div>
       </div>
       )
     }
