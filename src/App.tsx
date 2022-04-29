@@ -12,6 +12,7 @@ import { useState } from 'react';
 function App() {
 
   const [background, changeBackground] = useState(styles.bodyOff)
+  const [tableContent, changeTable] = useState(<></>)
 
   let foundProgramIds: Array<ForkedProgramDto> = []
 
@@ -474,6 +475,22 @@ function App() {
     return false
   }
 
+  const renderTable = () => {
+    let allContent = <></>
+    
+
+    
+      allContent = <div className={styles.tableContent}>	
+			<div className={styles.tableRow}>		
+				<div className={styles.tableData}>Tom</div>
+				<div className={styles.tableData}>2</div>
+				<div className={styles.tableData}>0</div>
+			</div>
+      
+		</div>	
+    
+  }
+
   const printSavedProgramIds = () => {
     for (let i = 0; i < foundProgramIds.length; i++){
       console.log(foundProgramIds.at(i))
@@ -506,13 +523,7 @@ function App() {
 			<div className={styles.headerItem}><a>ownerId</a></div>
 			<div className={styles.headerItem}><a>isFork </a></div>
 		</div>
-		<div className={styles.tableContent}>	
-			<div className={styles.tableRow}>		
-				<div className={styles.tableData}>Tom</div>
-				<div className={styles.tableData}>2</div>
-				<div className={styles.tableData}>0</div>
-			</div>
-		</div>	
+		{tableContent}
 	</div>
 </div>
         </body>
