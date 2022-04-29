@@ -502,9 +502,9 @@ function App() {
 	
 	<div className={styles.table}>
 		<div className={styles.tableHeader}>
-			<div className={styles.headerItem}><a>programId</a></div>
-			<div className={styles.headerItem}><a>ownerId</a></div>
-			<div className={styles.headerItem}><a>isFork </a></div>
+			<div className={styles.headerItem}><a>Program Id</a></div>
+			<div className={styles.headerItem}><a>Owner Id</a></div>
+			<div className={styles.headerItem}><a>Is fork </a></div>
 		</div>
 		<div className={styles.tableContent}>	
 			<div className={styles.tableRow}>		
