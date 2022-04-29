@@ -418,25 +418,19 @@ function App() {
 
 
           
-          if (transaction && !includesProgramId(foundProgramIds, transaction.transaction.message.accountKeys.toString())){
+          if (transaction && !includesProgramIds(foundProgramIds, transaction.transaction.message.accountKeys)){
 
-            console.log("YAY?")
             const programId = await findExecutableProgram(transaction.transaction.message.accountKeys)
 
-            console.log("more yay")
             if (programId) {
               await new Promise((r) => setTimeout(r, 1000)) // wait 1 second
               const programInfo = await connection.getAccountInfo(programId)
 
-              console.log("super yay")
                const newForkedProgram: ForkedProgramDto = programInfo ? 
                   { programId: programId.toString(), ownerId: programInfo?.owner.toString(), isFork: isFork } : 
                   { programId: programId.toString(), ownerId: "", isFork: isFork }
 
-              console.log(newForkedProgram)
               foundProgramIds.push(newForkedProgram)
-
-              
               renderTable()
 
               // Update UI
@@ -461,6 +455,7 @@ function App() {
   }
 
   const findExecutableProgram = async(accountIds: Array<web3.PublicKey>) => {
+
     for (const accountKey of accountIds){
      
         await new Promise((r) => setTimeout(r, 100)) // wait 0.1 seconds
@@ -479,9 +474,11 @@ function App() {
    * @param findProgramId programId you want to check if is included in programs Array
    * @returns true if programs include programId
    */
-  const includesProgramId = (programs: Array<ProgramDto>, findProgramId: string) => {
+  const includesProgramIds = (programs: Array<ProgramDto>, findProgramIds: Array<web3.PublicKey>) => {
+
     for (const program of programs){
-      if (program.programId === findProgramId) return true
+      for (const findProgramId of findProgramIds)
+      if (program.programId === findProgramId.toString()) return true
     }
     return false
   }
@@ -493,8 +490,8 @@ function App() {
     const things: Array<JSX.Element> = []
     for(const forkedProgram of foundProgramIds){
        things.push( <div className={styles.tableRow}>		
-        <div className={styles.tableData}>{forkedProgram.programId}</div>
-        <div className={styles.tableData}>{forkedProgram.ownerId}</div>
+        <div className={styles.tableData}>{forkedProgram.programId.substring(8) + ".."}</div>
+        <div className={styles.tableData}>{forkedProgram.ownerId.substring(8) + ".."}</div>
         <div className={styles.tableData}>{forkedProgram.isFork}</div>
       </div>
       )
