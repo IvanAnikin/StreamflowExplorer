@@ -2,6 +2,9 @@ import './App.css';
 import * as web3 from '@solana/web3.js';
 import { hasSelectionSupport } from '@testing-library/user-event/dist/utils';
 import { AccountStructureDto } from '../DTO/AccountStructureDto'
+import { ExecutableProgramDto } from '../DTO/ExecutableProgramDto'
+import { ProgramDto } from '../DTO/ProgramDto';
+
 
 
 function App() {
@@ -61,6 +64,8 @@ function App() {
     "BONFIDA Ray Pool": "4fiysjiegD8yoqHX75YXBvhBzmaUEQhyuAVRX8fGL3F1",
     "BONFIDA Governance Token": "5vUBtmmHjSfpY1h24XhzEjRKjDyK5jNL9gT2BfM3wcnb"
   };
+
+  const executablePrograms: Array<ExecutableProgramDto> = [] 
 
     //Streamflow original transactions examples
     //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -194,8 +199,10 @@ function App() {
     //const programInfo = await connection.getAccountInfo(new web3.PublicKey(programId))
     const transactions = await connection.getConfirmedSignaturesForAddress2(new web3.PublicKey(programId), { before: previousId })
 
-    const state = await analyzeState("8e72pYCDaxu3GqMfeQ5r8wFgoZSYk6oua1Qo9XpsZjX")
-    console.log(state)
+    //const state = await analyzeState(new web3.PublicKey("8e72pYCDaxu3GqMfeQ5r8wFgoZSYk6oua1Qo9XpsZjX"))
+    //console.log(state)
+
+
     for (let i = 0; i < transactions.length; i++){
       await analyzeTransaction(transactions.at(i)?.signature)
       await new Promise((r) => setTimeout(r, 200)) // wait 0.2 seconds
@@ -239,14 +246,18 @@ function App() {
 
   
 
+
+  
   /**
    * Checks if program has same structure (size in bytes)
+   * @Optimized
    * 
    * @param programId
    * @returns true if size is the same
    */
-  const analyzeState = async(programId: string) => {
-    const programAccounts = await connection.getProgramAccounts(new web3.PublicKey(programId));
+  const analyzeState = async(programId: web3.PublicKey) => {
+
+    const programAccounts = await connection.getProgramAccounts(programId);
 
     let isSizeSame = true
     programAccounts.forEach((program) => {
@@ -254,6 +265,11 @@ function App() {
             isSizeSame = false
         }
     })
+
+    const something = { programId: programId.toString(), isFork: isSizeSame}
+    executablePrograms.push(something)
+
+    console.log(executablePrograms)
     
     return isSizeSame
   }
@@ -264,7 +280,7 @@ function App() {
    * - then if the props @signer and @writable have the same ordering
    *  
    * @param message
-   * @returns
+   * @returns 
    * 0. true if possible fork
    * 1. string saying which instruction it is
    */
@@ -377,12 +393,38 @@ function App() {
         if (blockInfo) for (let transationIndex = 0; transationIndex < blockInfo?.transactions.length; transationIndex++){
           const transaction = blockInfo?.transactions.at(transationIndex)
           
-          analyzeTransaction(transaction)
+          console.log("analyzeTransaction")
+          await new Promise((r) => setTimeout(r, 5000)) // wait 5 seconds
+          
+          let isFork = await analyzeTransaction(transaction)
+          let executableProgramsCounter = 0;
 
-          console.log(transaction)
+          if (!isFork) transaction?.transaction.message.accountKeys.forEach(async(accountKey) => {
+            if (!includesProgramId(executablePrograms, accountKey.toString()) && !isFork){
+              const accountInfo = await connection.getAccountInfo(accountKey)
+              if (accountInfo?.executable) {
+                isFork = await analyzeState(accountKey)
+                executableProgramsCounter++
+              }
+            }
+          });
 
-          console.log("transaction checked")
+
+          if (isFork && transaction){
+            const programId = findExecutableProgram(transaction.transaction.message.accountKeys)
+            
+
+
+            // Add to the database
+
+            //
+
+            //
+
+            //
+          }
         }
+        
 
         console.log("Block checked")
       }
@@ -396,6 +438,26 @@ function App() {
     }
   }
 
+  const findExecutableProgram = async(accountIds: Array<web3.PublicKey>) => {
+
+    // to be completed
+    
+    accountIds.forEach(() => {})
+  }
+
+  /**
+   * Simple method to determine if programId is already included in programs Array
+   * 
+   * @param programs Array of ProgramDtos (usualy executablePrograms)
+   * @param findProgramId programId you want to check if is included in programs Array
+   * @returns true if programs include programId
+   */
+  const includesProgramId = (programs: Array<ProgramDto>, findProgramId: string) => {
+    programs.forEach((program) => {
+      if (program.programId === findProgramId) return true
+    })
+    return false
+  }
 
   const printSavedProgramIds = () => {
     for (let i = 0; i < foundProgramIds.length; i++){
