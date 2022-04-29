@@ -489,10 +489,9 @@ function App() {
             <h1>Streamflow Explorer</h1>
         </header>
         <body>
-            <div className="Buttons">
-                <button className ={styles.button} role="button"><span className={styles.span}>Button 64</span></button>
-                <button type='button' onClick={getNewestProgramIds}>Get newest program ids</button>
-                <button type='button' onClick={stopSearching}>Stop searching</button>
+            <div className={styles.buttons}>
+                <button className ={styles.button} role="button" onClick={getNewestProgramIds}><span className={styles.span}>Get newest program ids</span></button>
+                <button className ={styles.button} role="button" onClick={stopSearching}><span className={styles.span}>Stop searching</span></button>
             </div>
         </body>
     </div>

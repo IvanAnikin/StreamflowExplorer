@@ -12,16 +12,18 @@ body {
   flex-direction: column;
 }
 
-.Buttons {
+.buttons {
   padding-top: 350px;
   margin-left: auto;
   margin-right: auto;
-
+  display: flex;
+  flex-direction: column;
 }
 
 
 /* CSS */
 .button {
+  margin: 10px;
   align-items: center;
   background-image: linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB);
   border: 0;
