@@ -11,12 +11,14 @@
 
 
 .bodyOn{
+  font-family: inter, sans-serif;
   background-color: rgba(7, 134, 103, 0.534);
   display: flex;
   height: calc(100vh - 82px);
   flex-direction: column;
 }
 .bodyOff{
+  font-family: inter, sans-serif;
   background-color: #15191d;
   display: flex;
   height: calc(100vh - 82px);
@@ -109,19 +111,6 @@ $color-form-highlight: #EEEEEE;
 .table {
   margin-top: 20%;
 	width:100%;
-  th:first-of-type {
-    border-top-left-radius: 10px;
-  }
-  th:last-of-type {
-    border-top-right-radius: 10px;
-  }
-  tr:last-of-type td:first-of-type {
-    border-bottom-left-radius: 10px;
-  }
-  tr:last-of-type td:last-of-type {
-    border-bottom-right-radius: 10px;
-  }
-	border:1px solid $color-form-highlight;
 }
 
 .tableHeader {
@@ -147,7 +136,7 @@ $color-form-highlight: #EEEEEE;
 }
 
 .headerItem {
-	text-transform:uppercase;
+  font-family: inter, sans-serif;
   color:white;
 }
 
