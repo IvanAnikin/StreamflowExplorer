@@ -7,12 +7,13 @@ import { ExecutableProgramDto } from '../DTO/ExecutableProgramDto'
 import { ProgramDto } from '../DTO/ProgramDto';
 import { ForkedProgramDto } from "../DTO/ForkedProgramDto"
 import { useState } from 'react';
+import React from 'react';
 
 
 function App() {
 
   const [background, changeBackground] = useState(styles.bodyOff)
-  const [tableContent, changeTable] = useState(<></>)
+  const [tableContent, changeTable] = React.useState<Array<JSX.Element>>()
 
   let foundProgramIds: Array<ForkedProgramDto> = []
 
@@ -393,9 +394,11 @@ function App() {
           
           console.log("analyzeTransaction")
           let isFork = await analyzeTransaction(transaction)
+
+          console.log(isFork + " <- you are knife lol")
           let executableProgramsCounter = 0;
 
-          
+          /*
           if (!isFork) for (const accountKey of transaction?.transaction.message.accountKeys){
             if (!includesProgramId(executablePrograms, accountKey.toString()) && !includesProgramId(blacklistedProgramIds, accountKey.toString()) && !isFork){
               await new Promise((r) => setTimeout(r, 200)) // wait 0.2 seconds
@@ -409,24 +412,32 @@ function App() {
               }
             }
           }
-
+*/
           //const programId = await findExecutableProgram(transaction.transaction.message.accountKeys)
           //if (!programId) console.log("<<<<<<<<<<<<<<<<<<<<< It does not have it >>>>>>>>>>>>>>")
 
 
-
+          
           if (transaction && !includesProgramId(foundProgramIds, transaction.transaction.message.accountKeys.toString())){
+
+            console.log("YAY?")
             const programId = await findExecutableProgram(transaction.transaction.message.accountKeys)
 
+            console.log("more yay")
             if (programId) {
               await new Promise((r) => setTimeout(r, 1000)) // wait 1 second
               const programInfo = await connection.getAccountInfo(programId)
 
+              console.log("super yay")
                const newForkedProgram: ForkedProgramDto = programInfo ? 
                   { programId: programId.toString(), ownerId: programInfo?.owner.toString(), isFork: isFork } : 
                   { programId: programId.toString(), ownerId: "", isFork: isFork }
 
+              console.log(newForkedProgram)
               foundProgramIds.push(newForkedProgram)
+
+              
+              renderTable()
 
               // Update UI
 
@@ -476,18 +487,25 @@ function App() {
   }
 
   const renderTable = () => {
-    let allContent = <></>
+
+    console.log(foundProgramIds)
+
+    const things: Array<JSX.Element> = []
+    for(const forkedProgram of foundProgramIds){
+       things.push( <div className={styles.tableRow}>		
+        <div className={styles.tableData}>forkedProgram.programId</div>
+        <div className={styles.tableData}>forkedProgram.ownerId</div>
+        <div className={styles.tableData}>forkedProgram.isFork</div>
+      </div>
+      )
+    }
     
 
-    
-      allContent = <div className={styles.tableContent}>	
-			<div className={styles.tableRow}>		
-				<div className={styles.tableData}>Tom</div>
-				<div className={styles.tableData}>2</div>
-				<div className={styles.tableData}>0</div>
-			</div>
-      
-		</div>	
+
+
+    console.log(things)
+
+    changeTable(things)
     
   }
 
@@ -523,8 +541,10 @@ function App() {
 			<div className={styles.headerItem}><a>Owner Id</a></div>
 			<div className={styles.headerItem}><a>Is fork </a></div>
 		</div>
-		{tableContent}
 	</div>
+  {tableContent}
+  
+
 </div>
         </body>
         
@@ -533,3 +553,4 @@ function App() {
 }
 
 export default App;
+
