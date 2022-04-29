@@ -1,12 +1,12 @@
 import './App.css';
 import * as web3 from '@solana/web3.js';
 import { hasSelectionSupport } from '@testing-library/user-event/dist/utils';
+import { AccountStructureDto } from '../DTO/AccountStructureDto'
 
 
 function App() {
 
-  let foundProgramIds = [""]
-  foundProgramIds.pop();
+  let foundProgramIds: Array<string> = []
 
   //#region unique messages
   const uniqueMessages = [
@@ -169,6 +169,7 @@ function App() {
   let counter = 0;
   let badAccsCount = 0;
 
+  let searching = false;
 
 
   /**
@@ -195,16 +196,16 @@ function App() {
 
     const state = await analyzeState("8e72pYCDaxu3GqMfeQ5r8wFgoZSYk6oua1Qo9XpsZjX")
     console.log(state)
-    /*for (let i = 0; i < transactions.length; i++){
+    for (let i = 0; i < transactions.length; i++){
       await analyzeTransaction(transactions.at(i)?.signature)
-      await new Promise((r) => setTimeout(r, 200)) // wait 5 seconds
-    }*/
+      await new Promise((r) => setTimeout(r, 200)) // wait 0.2 seconds
+    }
 
     //const transactionId = "3QuLmNK9VLqufnTuwVcAQ3BhYiakT7d1kNEJepz8mR57v6xfsrRvbhu158YRB1EstzhuWbhvQBcFhD8m9ny6bhVu";
 	//await analyzeTransaction(transactionId)
     counter++
-    //console.log(counter)
-    //if (transactions.length === 1000) await analyzeProgramId(programId, transactions.at(999)?.signature)
+    console.log(counter)
+    if (transactions.length === 1000) await analyzeProgramId(programId, transactions.at(999)?.signature)
   }
   
 
@@ -216,22 +217,28 @@ function App() {
    */
   const analyzeTransaction = async( transaction: any ) => {
     const transactionInfo = typeof transaction === "string" ? await connection.getParsedTransaction(transaction) : transaction
+    //console.log(transactionInfo)
     
-    if (transactionInfo && transactionInfo.meta && transactionInfo.meta.logMessages) {
 
-        const logMessages: string[] = transactionInfo.meta.logMessages
-        const analyzedLogMessages = analyzeLogMessages(logMessages)
-	    const message: any = transactionInfo.transaction.message
-        const accAnalyzation: any = analyzeAccounts(message);
+    const logMessages: string[] = transactionInfo.meta.logMessages
+    const analyzedLogMessages = analyzeLogMessages(logMessages)
 
-        if(analyzedLogMessages || accAnalyzation[0])
-        {
-            return true
-        }
-        else
-            return false
+	  const message: any = transactionInfo.transaction.message
+    const accAnalyzation: AccountStructureDto = await analyzeAccounts(message, transactionInfo.transaction.signatures.at(0));
+
+    if(analyzedLogMessages || accAnalyzation.possibleFork)
+    {
+      console.log("FORK")
+      return true
+    }
+    else {
+      console.log("NOT FORK")
+      return false
     }
   }
+
+  
+
   /**
    * Checks if program has same structure (size in bytes)
    * 
@@ -256,45 +263,58 @@ function App() {
    * - if Account count coresponds to the Original
    * - then if the props @signer and @writable have the same ordering
    *  
-   * @param message 
+   * @param message
    * @returns
    * 0. true if possible fork
    * 1. string saying which instruction it is
    */
-  const analyzeAccounts = (message: any) => {
-    if(message.instructions[0].accounts.length === 8 || message.instructions[0].accounts.length === 9 || message.instructions[0].accounts.length === 10 || message.instructions[0].accounts.length === 12){
+  const analyzeAccounts = async(message: any, transactionId: string) => {
+    for (let i = 0; i < message.instructions.length; i++){
+      if(message.instructions[i].accounts.length === 8 || message.instructions[i].accounts.length === 9 || message.instructions[i].accounts.length === 10 || message.instructions[i].accounts.length === 12){
 
+        const transactionInfo = await connection.getParsedTransaction(transactionId)
+        console.log("waiting 1 second")
+        await new Promise((r) => setTimeout(r, 1000)) // wait 1 seconds
+        
+
+        const messageWithAllInfo: any = transactionInfo?.transaction.message
         //pair instructions with instruction attributes
-        var instructionAttributes = new Array()
-        message.instructions[0].accounts.forEach((instructionAccount: any) => {
-            message.accountKeys.forEach((accountKey: any) => {
-                const a = toString()
-                if(JSON.stringify(accountKey.pubkey._bn.words) === JSON.stringify(instructionAccount._bn.words)){
-                    instructionAttributes.push([accountKey.signer, accountKey.writable])
-                }
-            })
+        let instructionAttributes = new Array()
+
+        //console.log(message.instructions[i].accounts.length + "        " + message.accountKeys.length)
+
+        
+        if (messageWithAllInfo.instructions[i].accounts) messageWithAllInfo.instructions[i].accounts.forEach((instructionAccount: any) => {
+          messageWithAllInfo.accountKeys.forEach((accountKey: any) => {
+            if(JSON.stringify(accountKey.pubkey._bn.words) === JSON.stringify(instructionAccount._bn.words)){
+              instructionAttributes.push([accountKey.signer, accountKey.writable])
+            }
+          })
         })
+        
+        
+          
 
         //check if instruction structure fits any streamflow transaction
         switch(JSON.stringify(instructionAttributes)){
-            case JSON.stringify(instructionStructureCreate):
-                return [true, "create"]
-            case JSON.stringify(instructionStructureCreate2):
-                return [true, "create"]
-            case JSON.stringify(instructionStructureWithdraw):
-                return [true, "withdraw"]
-            case JSON.stringify(instructionStructureWithdraw2):
-                return [true, "withdraw"]
-            case JSON.stringify(instructionStructureTransfer):
-                return [true, "transfer"]
-            case JSON.stringify(instructionStructureCancel):
-                return [true, "cancel"]
-            case JSON.stringify(instructionStructureCancel2):
-                return [true, "cancel"]
-            default:
-                return [false, instructionAttributes]
-        }
+              case JSON.stringify(instructionStructureCreate):
+                  return { possibleFork: true, instructionType: "create" }
+              case JSON.stringify(instructionStructureCreate2):
+                  return { possibleFork: true, instructionType: "create"}
+              case JSON.stringify(instructionStructureWithdraw):
+                  return { possibleFork: true, instructionType: "withdraw"}
+              case JSON.stringify(instructionStructureWithdraw2):
+                  return { possibleFork: true, instructionType: "withdraw"}
+              case JSON.stringify(instructionStructureTransfer):
+                  return { possibleFork: true, instructionType: "transfer"}
+              case JSON.stringify(instructionStructureCancel):
+                  return { possibleFork: true, instructionType: "cancel"}
+              case JSON.stringify(instructionStructureCancel2):
+                  return { possibleFork: true, instructionType: "cancel"}
+          }
+      }
     }
+    return { possibleFork: false, instructionType: "Something else"}
   }
 
   /**
@@ -338,26 +358,41 @@ function App() {
    * @ToBeAdded registering data to a Database
    */
   const getNewestProgramIds = async () => {
-    for (let i = 0; i < 1000 /*100*/; i++){
+    searching = true
+    const oneTime = true 
+
+    while(searching){
+
       const block = await connection.getBlockHeight();
       console.log("Block height: " + block);
+
       try {
         const blockInfo = await connection.getBlock(block);
-        console.log(blockInfo)
+
+        console.log("waiting 5 secs")
+        await new Promise((r) => setTimeout(r, 5000)) // wait 5 seconds
+        
+        
 
         if (blockInfo) for (let transationIndex = 0; transationIndex < blockInfo?.transactions.length; transationIndex++){
           const transaction = blockInfo?.transactions.at(transationIndex)
           
           analyzeTransaction(transaction)
+
+          console.log(transaction)
+
+          console.log("transaction checked")
         }
+
+        console.log("Block checked")
       }
       catch (error){
-        console.log("ERROR")
+        console.log("ERROR: " + error)
       }
 
       console.log(foundProgramIds.length);
 
-      //await new Promise((r) => setTimeout(r, 5000)) // wait 5 seconds
+      if (oneTime) searching = false
     }
   }
 
@@ -368,6 +403,10 @@ function App() {
     }
   }
 
+  const stopSearching = () => {
+    searching = false;
+    console.log("searching stopped")
+  }
   
 
   const get_interesting = async () => {
@@ -439,6 +478,8 @@ function App() {
           <button type='button' onClick={getNewestProgramIds}>Get newest program ids</button>
           <button type='button' onClick={printSavedProgramIds}>Print saved program ids</button>
           <button type='button' onClick={analyzeStreamflow}>Analyze Streamflow program</button>
+          <button type='button' onClick={stopSearching}>Stop searching</button>
+
 
         </div>
       </header>
