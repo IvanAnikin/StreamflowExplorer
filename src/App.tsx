@@ -413,8 +413,6 @@ function App() {
             }
           }
 */
-          //const programId = await findExecutableProgram(transaction.transaction.message.accountKeys)
-          //if (!programId) console.log("<<<<<<<<<<<<<<<<<<<<< It does not have it >>>>>>>>>>>>>>")
 
 
           
@@ -530,7 +528,7 @@ function App() {
                 <button className ={styles.button} role="button" onClick={getNewestProgramIds}><span className={styles.span}>Get newest program ids</span></button>
                 <button className ={styles.button} role="button" onClick={stopSearching}><span className={styles.span}>Stop searching</span></button>
             </div>
-            <div className="container">
+            <div className={styles.container}>
 	
 	<div className={styles.table}>
 		<div className={styles.tableHeader}>
