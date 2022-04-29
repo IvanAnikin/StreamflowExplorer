@@ -114,9 +114,11 @@ $color-form-highlight: #EEEEEE;
 }
 
 .tableHeader {
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
 	display:flex;
 	width:100%;
-	background:rgb(30, 30, 49);
+	background:#1c2530;
 	padding:($half-spacing-unit * 1.5) 0;
 }
 
@@ -136,6 +138,7 @@ $color-form-highlight: #EEEEEE;
 }
 
 .headerItem {
+  font-size: 25px;
   font-family: inter, sans-serif;
   color:white;
 }
