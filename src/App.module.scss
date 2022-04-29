@@ -99,10 +99,11 @@ $color-form-highlight: #EEEEEE;
 
 
 .container {
-	width:100%;
+	width:80%;
 	margin-right:auto;
 	margin-left:auto;
 	display:flex;
+  flex-direction: column;
 	justify-content:center;
 	align-items:center;
 	min-height:100vh;
@@ -114,26 +115,37 @@ $color-form-highlight: #EEEEEE;
 }
 
 .tableHeader {
+  
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
 	display:flex;
 	width:100%;
 	background:#1c2530;
+  justify-content: space-between;
 	padding:($half-spacing-unit * 1.5) 0;
 }
 
 .tableRow {
   overflow: hidden;
 	display:flex;
+  justify-content: space-between;
 	width:100%;
-	padding:($half-spacing-unit * 1.5) 0;
+  padding:($half-spacing-unit * 1.5) 0;
+	background-color: #ffffffa4;
 	
 }
 
 .tableData, .headerItem {
+  overflow: hidden;
   color: white;
-	flex:  18;
+	width: 30%;
 	text-align:center;
+}
+
+.tableData{
+  color: Black;
+  font-weight: bolder;
+  font-size: 20px;
 }
 
 .headerItem {
