@@ -12,13 +12,13 @@
 .bodyOn{
   background-color: rgba(7, 134, 103, 0.534);
   display: flex;
-  height: 800px;
+  height: 100vh;
   flex-direction: column;
 }
 .bodyOff{
   background-color: #15191d;
   display: flex;
-  height: 800px;
+  height: 100vh;
   flex-direction: column;
 }
 
@@ -156,7 +156,7 @@ $color-form-highlight: #EEEEEE;
 	
 
 h1 {
-  
+  color: white;
   margin-top: 20px;
   margin-left: 20px;
   font-family: inter, sans-serif;
