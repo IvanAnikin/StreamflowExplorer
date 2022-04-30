@@ -7,9 +7,14 @@ import { ExecutableProgramDto } from '../DTO/ExecutableProgramDto'
 import { ProgramDto } from '../DTO/ProgramDto';
 import { ForkedProgramDto } from "../DTO/ForkedProgramDto"
 import axios from "axios";
+import { useState } from 'react';
+import React from 'react';
 
 
 function App() {
+
+  const [background, changeBackground] = useState(styles.bodyOff)
+  const [tableContent, changeTable] = React.useState<Array<JSX.Element>>()
 
   const http = axios.create({
     baseURL: "http://localhost:5000/api",
@@ -129,11 +134,11 @@ function App() {
   ]
   //#endregion
 
-  const blacklistedProgramIds = [
-    "11111111111111111111111111111111",
-    "Config1111111111111111111111111111111111111",
-    "Vote111111111111111111111111111111111111111",
-    "Stake11111111111111111111111111111111111111"
+  const blacklistedProgramIds: Array<ProgramDto> = [
+    { programId: "11111111111111111111111111111111" },
+    { programId: "Config1111111111111111111111111111111111111" },
+    { programId: "Vote111111111111111111111111111111111111111" },
+    { programId: "Stake11111111111111111111111111111111111111" }
   ]
 
   const interesting_ids = {
@@ -441,7 +446,6 @@ function App() {
     return returnState
   }
 
-
   /**
    * Tries to get as many new Blocks as possible
    * Then analyzes them based on their transactions respectively 
@@ -449,6 +453,8 @@ function App() {
    * @ToBeAdded registering data to a Database
    */
   const getNewestProgramIds = async () => {
+    changeBackground(styles.bodyOn)
+
     searching = true
     const oneTime = false // change to false if you want this to run non-stop
 
@@ -464,11 +470,13 @@ function App() {
           
           console.log("analyzeTransaction")
           let isFork = await analyzeTransaction(transaction)
+
+          console.log(isFork + " <- you are knife lol")
           let executableProgramsCounter = 0;
 
-          
+          /*
           if (!isFork) for (const accountKey of transaction?.transaction.message.accountKeys){
-            if (!includesProgramId(executablePrograms, accountKey.toString()) && !isFork){
+            if (!includesProgramId(executablePrograms, accountKey.toString()) && !includesProgramId(blacklistedProgramIds, accountKey.toString()) && !isFork){
               await new Promise((r) => setTimeout(r, 200)) // wait 0.2 seconds
               const accountInfo = await connection.getAccountInfo(accountKey)
               if (accountInfo?.executable) {
@@ -480,9 +488,9 @@ function App() {
               }
             }
           }
-          console.log(executableProgramsCounter + " <=======")
+*/
+          if (transaction && !includesProgramIds(foundProgramIds, transaction.transaction.message.accountKeys)){
 
-          if (transaction && !includesProgramId(foundProgramIds, transaction.transaction.message.accountKeys.toString())){
             const programId = await findExecutableProgram(transaction.transaction.message.accountKeys)
 
             if (programId) {
@@ -494,6 +502,7 @@ function App() {
                   { programId: programId.toString(), ownerId: "", isFork: isFork }
 
               foundProgramIds.push(newForkedProgram)
+              renderTable()
 
               // Update UI
 
@@ -531,9 +540,10 @@ function App() {
   }
 
   const findExecutableProgram = async(accountIds: Array<web3.PublicKey>) => {
+
     for (const accountKey of accountIds){
      
-        await new Promise((r) => setTimeout(r, 200)) // wait 0.2 seconds
+        await new Promise((r) => setTimeout(r, 100)) // wait 0.1 seconds
         const accountInfo = await connection.getAccountInfo(accountKey)
         if (accountInfo?.executable) {
           return accountKey
@@ -549,11 +559,36 @@ function App() {
    * @param findProgramId programId you want to check if is included in programs Array
    * @returns true if programs include programId
    */
-  const includesProgramId = (programs: Array<ProgramDto>, findProgramId: string) => {
+  const includesProgramIds = (programs: Array<ProgramDto>, findProgramIds: Array<web3.PublicKey>) => {
+
     for (const program of programs){
-      if (program.programId === findProgramId) return true
+      for (const findProgramId of findProgramIds)
+      if (program.programId === findProgramId.toString()) return true
     }
     return false
+  }
+
+  const renderTable = () => {
+
+    console.log(foundProgramIds)
+
+    const things: Array<JSX.Element> = []
+    for(const forkedProgram of foundProgramIds){
+       things.push( <div className={styles.tableRow}>		
+        <div className={styles.tableData}>{forkedProgram.programId}</div>
+        <div className={styles.tableData}>{forkedProgram.ownerId.substring(0, 15) + ".."}</div>
+        <div className={styles.tableData}>{forkedProgram.isFork.toString()}</div>
+      </div>
+      )
+    }
+    
+
+
+
+    console.log(things)
+
+    changeTable(things)
+    
   }
 
   const printSavedProgramIds = () => {
@@ -563,6 +598,7 @@ function App() {
   }
 
   const stopSearching = () => {
+    changeBackground(styles.bodyOff)
     searching = false;
     console.log("searching stopped")
   }
@@ -570,11 +606,11 @@ function App() {
 
 
   return (
-    <div className="App">
-        <header className="App-header">
+    <div className={styles.app}>
+        <header className={styles.AppHeader}>
             <h1>Streamflow Explorer</h1>
         </header>
-        <body>
+        <body className={background}>
             <div className={styles.buttons}>
                 <button className ={styles.button} role="button" onClick={getNewestProgramIds}><span className={styles.span}>Get newest program ids</span></button>
                 <button className ={styles.button} role="button" onClick={stopSearching}><span className={styles.span}>Stop searching</span></button>
@@ -585,9 +621,24 @@ function App() {
                 <button className ={styles.button} role="button" onClick={saveAccount}><span className={styles.span}>Save test account</span></button>
                 <button className ={styles.button} role="button" onClick={testPrisma}><span className={styles.span}>Test Prisma</span></button>
             </div>
+            <div className={styles.container}>
+	
+              <div className={styles.table}>
+                <div className={styles.tableHeader}>
+                  <div className={styles.headerItem}><a>Program Id</a></div>
+                  <div className={styles.headerItem}><a>Owner Id</a></div>
+                  <div className={styles.headerItem}><a>Is fork </a></div>
+                </div>
+              </div>
+              {tableContent}
+  
+
+            </div>
         </body>
+        
     </div>
   );
 }
 
 export default App;
+

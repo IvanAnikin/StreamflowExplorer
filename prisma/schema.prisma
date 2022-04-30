@@ -16,9 +16,9 @@ model Account {
 
 model Transaction {
   id        Int      @id @default(autoincrement())
-  from     String
-  to   String
-  datetime String?
+  from      String
+  to        String
+  datetime  String?
   ammount    String
   note  String?
 }
