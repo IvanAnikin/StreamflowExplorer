@@ -22,3 +22,10 @@ model Transaction {
   ammount    String
   note  String?
 }
+
+model forkedProgram {
+  id        Int      @id @default(autoincrement())
+  programId     String  @unique
+  owner   String
+  isFork Boolean
+}

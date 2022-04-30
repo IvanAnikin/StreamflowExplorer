@@ -6,9 +6,88 @@ import { AccountStructureDto } from '../DTO/AccountStructureDto'
 import { ExecutableProgramDto } from '../DTO/ExecutableProgramDto'
 import { ProgramDto } from '../DTO/ProgramDto';
 import { ForkedProgramDto } from "../DTO/ForkedProgramDto"
+import axios from "axios";
 
 
 function App() {
+
+  const http = axios.create({
+    baseURL: "http://localhost:5000/api",
+    headers: {
+      "Content-type": "application/json"
+    }
+  });
+  interface IaccountData {
+    id?: any | null,
+    accountID?: string,
+    name: string,
+    note: string,
+  }
+  interface ItransactionData {
+    id?: any | null,
+    transactionID?: string,
+    fromID: string,
+    toID: string,
+    program: string,
+    name: string,
+    note: string,
+  }
+
+  const testPrisma = () => {
+    var requestData={
+      body: {}
+    }
+    http.post<IaccountData>("/testPrisma", requestData)
+      .then((response: any) => {
+        console.log(response.data);
+      })
+      .catch((e: Error) => {
+        console.log(e);
+      });
+  };
+  const saveAccount = () => {
+    var accountID = document.getElementById("accountID") as HTMLInputElement;
+    var accountID_val = accountID.value as string;
+    var accountName = document.getElementById("accountName") as HTMLInputElement;
+    var accountName_val = accountName.value as string;
+    var accountNote = document.getElementById("accountNote") as HTMLInputElement;
+    var accountNote_val = accountNote.value as string;
+    var accountData = {
+      accountID: accountID_val,
+      name: accountName_val,
+      note: accountNote_val
+    };
+    var requestData={
+      body: accountData
+    }
+    http.post<IaccountData>("/saveAccount", requestData)
+      .then((response: any) => {
+        console.log(response.data);
+      })
+      .catch((e: Error) => {
+        console.log(e);
+      });
+  };
+  const saveTransaction = () => {
+    var transactionData = {
+      transactionID: "test ID",
+      fromID: "test fromID",
+      toID: "test toID",
+      program: "test program",
+      name: "test name",
+      note: "test note"
+    };
+    var requestData={
+      body: transactionData
+    }
+    http.post<ItransactionData>("/saveTransaction", requestData)
+      .then((response: any) => {
+        console.log(response.data);
+      })
+      .catch((e: Error) => {
+        console.log(e);
+      });
+  };
 
   let foundProgramIds: Array<ForkedProgramDto> = []
 
@@ -381,9 +460,6 @@ function App() {
       try {
         const blockInfo = await connection.getBlock(block);
 
-        
-        
-
         if (blockInfo) for (const transaction of blockInfo?.transactions){
           
           console.log("analyzeTransaction")
@@ -401,14 +477,10 @@ function App() {
                 isFork = await analyzeState(accountKey)
                 executableProgramsCounter++
                 console.log(executableProgramsCounter + " <-")
-                
               }
             }
           }
-
           console.log(executableProgramsCounter + " <=======")
-
-
 
           if (transaction && !includesProgramId(foundProgramIds, transaction.transaction.message.accountKeys.toString())){
             const programId = await findExecutableProgram(transaction.transaction.message.accountKeys)
@@ -426,7 +498,21 @@ function App() {
               // Update UI
 
               // Add to the database
-
+              var newForkedProgramData = {
+                programId: programId.toString(),
+                owner: programInfo?.owner.toString(),
+                isFork: isFork
+              };
+              var requestData={
+                body: newForkedProgramData
+              }
+              http.post<IaccountData>("/saveForkedProgram", requestData) //saveAccount
+                .then((response: any) => {
+                  console.log(response.data);
+                })
+                .catch((e: Error) => {
+                  console.log(e);
+                });
             }
           }
         }
@@ -492,6 +578,12 @@ function App() {
             <div className={styles.buttons}>
                 <button className ={styles.button} role="button" onClick={getNewestProgramIds}><span className={styles.span}>Get newest program ids</span></button>
                 <button className ={styles.button} role="button" onClick={stopSearching}><span className={styles.span}>Stop searching</span></button>
+                <br></br>
+                <input type="text" className="form-control" id="accountID" name="accountID" placeholder='Account ID'></input>
+                <input type="text" className="form-control" id="accountName" name="accountName" placeholder='Account name'></input>
+                <input type="text" className="form-control" id="accountNote" name="accountNote" placeholder='Account note'></input>
+                <button className ={styles.button} role="button" onClick={saveAccount}><span className={styles.span}>Save test account</span></button>
+                <button className ={styles.button} role="button" onClick={testPrisma}><span className={styles.span}>Test Prisma</span></button>
             </div>
         </body>
     </div>
