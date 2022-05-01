@@ -138,7 +138,14 @@ function App() {
     { programId: "11111111111111111111111111111111" },
     { programId: "Config1111111111111111111111111111111111111" },
     { programId: "Vote111111111111111111111111111111111111111" },
-    { programId: "Stake11111111111111111111111111111111111111" }
+    { programId: "Stake11111111111111111111111111111111111111" },
+    { programId: "Vote111111111111111111111111111111111111111" },
+    { programId: "BPFLoaderUpgradeab1e11111111111111111111111" },
+    { programId: "Ed25519SigVerify111111111111111111111111111" },
+    { programId: "KeccakSecp256k11111111111111111111111111111" },
+    { programId: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL" },
+    { programId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" }
+
   ]
 
   const interesting_ids = {
@@ -576,7 +583,7 @@ function App() {
     for(const forkedProgram of foundProgramIds){
        things.push( <div className={styles.tableRow}>		
         <div className={styles.tableData}>{forkedProgram.programId}</div>
-        <div className={styles.tableData}>{forkedProgram.ownerId.substring(0, 15) + ".."}</div>
+        <div className={styles.tableData}>{forkedProgram.ownerId.toString()}</div>
         <div className={styles.tableData}>{forkedProgram.isFork.toString()}</div>
       </div>
       )
@@ -615,9 +622,11 @@ function App() {
                 <button className ={styles.button} role="button" onClick={getNewestProgramIds}><span className={styles.span}>Get newest program ids</span></button>
                 <button className ={styles.button} role="button" onClick={stopSearching}><span className={styles.span}>Stop searching</span></button>
                 <br></br>
-                <input type="text" className="form-control" id="accountID" name="accountID" placeholder='Account ID'></input>
-                <input type="text" className="form-control" id="accountName" name="accountName" placeholder='Account name'></input>
-                <input type="text" className="form-control" id="accountNote" name="accountNote" placeholder='Account note'></input>
+                <div className={styles.inputs}>
+                  <input type="text" className="form-control" id="accountID" name="accountID" placeholder='Account ID'></input>
+                  <input type="text" className="form-control" id="accountName" name="accountName" placeholder='Account name'></input>
+                  <input type="text" className="form-control" id="accountNote" name="accountNote" placeholder='Account note'></input>
+                </div>
                 <button className ={styles.button} role="button" onClick={saveAccount}><span className={styles.span}>Save test account</span></button>
                 <button className ={styles.button} role="button" onClick={testPrisma}><span className={styles.span}>Test Prisma</span></button>
             </div>
@@ -635,7 +644,7 @@ function App() {
 
             </div>
         </body>
-        
+        <footer></footer>
     </div>
   );
 }
