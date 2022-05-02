@@ -57,7 +57,16 @@ async function saveForkedProgram(programId, owner="", isFork="") {
         `Saved forkedProgram: ${forkedProgram.programId}`,
     )
 }
-
+async function getPrograms(){
+    const programs =  await prisma.forkedProgram.findMany({
+        select: {
+            programId: true,
+            owner: true,
+            isFork: true
+      }
+    })
+    return programs;
+}
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -116,8 +125,23 @@ app.post('/api/saveForkedProgram', (req, res) => {
     });
     if(error==""){
         res.send(
-        `Saved account: ${req.body.body.programId}`,
+        `Saved forkedProgram: ${req.body.body.programId}`,
         );
+    }
+});
+app.get('/api/getPrograms', async (req, res) => {
+    error="";
+    var allPrograms = await getPrograms().catch((e) => {
+        error=e.message;
+        console.error(e);
+        res.send(
+        `Whooops: ${error}`,
+        );
+    });
+    if(error==""){
+        res.send(allPrograms);
+        console.log(allPrograms);
+        console.log(`Found ${allPrograms.length} programs`);   
     }
 });
 

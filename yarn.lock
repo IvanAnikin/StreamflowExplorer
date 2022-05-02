@@ -8870,7 +8870,7 @@
     "ansi-styles" "^5.0.0"
     "react-is" "^17.0.1"
 
-"prisma@*", "prisma@3.13.0":
+"prisma@*", "prisma@^3.13.0":
   "integrity" "sha512-oO1auBnBtieGdiN+57IgsA9Vr7Sy4HkILi1KSaUG4mpKfEbnkTGnLOxAqjLed+K2nsG/GtE1tJBtB7JxN1a78Q=="
   "resolved" "https://registry.npmjs.org/prisma/-/prisma-3.13.0.tgz"
   "version" "3.13.0"

@@ -93,6 +93,15 @@ function App() {
         console.log(e);
       });
   };
+  const getPrograms = () => {
+    http.get("/getPrograms", {})
+      .then((response: any) => {
+        console.log(response.data);
+      })
+      .catch((e: Error) => {
+        console.log(e);
+      });
+  };
 
   let foundProgramIds: Array<ForkedProgramDto> = []
 
@@ -582,9 +591,6 @@ function App() {
       )
     }
     
-
-
-
     console.log(things)
 
     changeTable(things)
@@ -619,7 +625,7 @@ function App() {
                 <input type="text" className="form-control" id="accountName" name="accountName" placeholder='Account name'></input>
                 <input type="text" className="form-control" id="accountNote" name="accountNote" placeholder='Account note'></input>
                 <button className ={styles.button} role="button" onClick={saveAccount}><span className={styles.span}>Save test account</span></button>
-                <button className ={styles.button} role="button" onClick={testPrisma}><span className={styles.span}>Test Prisma</span></button>
+                <button className ={styles.button} role="button" onClick={getPrograms}><span className={styles.span}>Get Programs from DB</span></button>
             </div>
             <div className={styles.container}>
 	
